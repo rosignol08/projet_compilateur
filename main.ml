@@ -22,7 +22,8 @@ let () =
     Mips.emit Stdlib.stdout asm
   with
   | Lexer.Error c ->
-    err (Printf.sprintf "unrecognized char '%c'\n" c)
+    err (Printf.sprintf "unrecognized char '%c'" c)
         (Lexing.lexeme_start_p buf)
   | Parser.Error ->
     err "syntax error" (Lexing.lexeme_start_p buf)
+  | Semantics.Error (msg, pos) -> err msg pos
