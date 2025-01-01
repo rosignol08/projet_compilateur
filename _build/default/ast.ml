@@ -51,7 +51,7 @@ module IR = struct
     | Var of ident
     | Call  of ident * expr list
     type instr =
-    | Decl of ident
+    | Decl of ident (*pour declarer une variable*)
     | Assigne of ident * expr
     | Return of expr (* Retour d'une expression *)
     (*| If of expr * block * block *) (* Branchement conditionnel *)
@@ -71,7 +71,7 @@ module IR = struct
   | Expr of expr
   | Instr of instr
   
-  type block = stmt list  (* Un bloc est une liste de instructions ou expressions *)
+  type block = instr list  (* Un bloc est une liste de instructions ou expressions *)
 
   type prog = block list  (* Un programme est une liste de blocs *)
 

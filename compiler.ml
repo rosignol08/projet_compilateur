@@ -29,17 +29,18 @@ let rec compile_expr env expr =
 (* Compile une instruction en MIPS *)
 let rec compile_instr env instr =
   match instr with
-  | Decl { var; base_t; pos } ->
-    (* Compilation d'une déclaration de variable *)
-    let reg = if base_t = Int_t then V0 else if base_t = Bool_t then V1 else V2 in
-    [ Move (reg, zero) ] (* Initialisation de la variable à 0 *)
-  | Assigne { var; expr; pos } ->
-    (* Compilation d'une affectation *)
-    compile_expr env expr @ [ Sw (V0, Mem (SP, 0)) ] (* On suppose que la variable est en mémoire *)
-  | Return { expr; pos } ->
-    (* Compilation d'un retour d'expression *)
-    compile_expr env expr @ [ Jr RA ]
-  | _ -> [] (* Gérer d'autres instructions si nécessaire *)
+  | Decl _ ->
+    (* On suppose que la variable doit être initialisée à 0 dans la pile *)
+    [ Addi (SP, SP, -4); Sw (ZERO, Mem (SP, 0)) ] 
+    (* Réserve 4 octets sur la pile et initialise la variable à 0 *)
+    | Assigne (_, expr) ->
+      (* Compile l'expression et stocke le résultat dans la variable *)
+      compile_expr env expr @ [ Sw (V0, Mem (SP, 0)) ]
+      (* On suppose que la variable est à l'adresse SP + offset dans l'environnement *)
+  
+    | Return expr ->
+      (* Compile l'expression et effectue un saut vers l'appelant *)
+      compile_expr env expr @ [ Jr RA ]
 
 (* Compiler un bloc d'instructions et d'expressions *)
 let rec compile_block env block =

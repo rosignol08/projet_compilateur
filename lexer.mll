@@ -21,8 +21,7 @@ rule token = parse
 | "and"   { Land }
 | "or"    { Lor }
 | "not"   { Lnot }
-(*| '"' [^'"']* '"' as s { Lstring (String.sub s 1 (String.length s - 2)) }*)
-| '"' { Lgui }
+| '"'[^'"']*'"' as lxm { Lstring (String.sub lxm 1 (String.length lxm - 2)) }
 | "=" { Lassign }
 | "int" { Lint_t }
 | "bool" { Lbool_t }
