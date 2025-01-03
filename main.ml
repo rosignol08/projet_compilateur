@@ -17,7 +17,7 @@ let () =
     let syntax = Parser.prog Lexer.token buf in
     close_in f ;
     let ir = Semantics.analyze syntax in
-    let asm = Compiler.compile (List.flatten ir) in
+    let asm = Compiler.compile ir in
     Mips.emit stdout asm
   with
   | Lexer.Error c ->

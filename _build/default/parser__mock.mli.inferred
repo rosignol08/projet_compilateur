@@ -1,26 +1,5 @@
-type token =
-    Lvirgule
-  | Lvalue of string
-  | Lstring_t
-  | Lstring of string
-  | Lreturn
-  | Lplus
-  | Lparo
-  | Lparf
-  | Lor
-  | Lnot
-  | Lint_t
-  | Lint of int
-  | Lgui
-  | Lend
-  | Lbool_t
-  | Lbool of bool
-  | Lassign
-  | Land
+type token = Lstring of string | Lplus | Lint of int | Lend
 val menhir_begin_marker : int
 val xv_prog : Ast.Syntax.prog
-val xv_instr : Ast.Syntax.instr
 val xv_expr : Ast.Syntax.expr
-val xv_block : Ast.Syntax.block
-val xv_args : Ast.Syntax.expr list
 val menhir_end_marker : int
