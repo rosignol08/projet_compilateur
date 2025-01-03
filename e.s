@@ -8,10 +8,7 @@ _add:
 main:
   addi $sp, $sp, -4
   sw $ra, 0($sp)
-  la $a0, str840920576
-  li $v0, 4
-  syscall
-  la $a0, str485153258
+  la $a0, str888000370
   li $v0, 4
   syscall
   lw $ra, 0($sp)
@@ -19,5 +16,4 @@ main:
   jr $ra
 
 .data
-str840920576: .asciiz "hello"
-str485153258: .asciiz "world"
+str888000370: .asciiz "true"

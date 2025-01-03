@@ -1,4 +1,10 @@
-type token = Lstring of string | Lplus | Lint of int | Lend
+type token =
+    Ltrue of bool
+  | Lstring of string
+  | Lplus
+  | Lint of int
+  | Lfalse of bool
+  | Lend
 val menhir_begin_marker : int
 val xv_prog : Ast.Syntax.prog
 val xv_expr : Ast.Syntax.expr

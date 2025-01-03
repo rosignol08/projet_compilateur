@@ -1,11 +1,13 @@
 type base_t =
   | Int_t
   | String_t
+  | Bool_t
   | Func_t of base_t * base_t list
 
 let rec string_of_t = function
   | Int_t -> "int"
   | String_t -> "string"
+  | Bool_t -> "bool"
   | Func_t (rt, ats) ->
     Printf.sprintf "(%s) -> %s"
       (String.concat ", " (List.map string_of_t ats))
@@ -15,6 +17,7 @@ module Syntax = struct
   type expr =
   | Int of { value : int ; pos : Lexing.position }
   | String of { value : string ; pos : Lexing.position }
+  | Bool of { value : bool ; pos : Lexing.position }
   | Call of { func : string ; args : expr list ; pos : Lexing.position }
 
   type prog = expr list
@@ -26,6 +29,7 @@ module IR = struct
   type expr =
   | Int of int
   | String of string
+  | Bool of bool
   | Call of string * expr list
 
   type prog = expr list

@@ -17,4 +17,6 @@ rule token = parse
 | '+' { Lplus }
 | num as n { Lint (int_of_string n) }
 | identifier as id { Lstring id }
+| "true" { Ltrue true }
+| "false" { Lfalse false }
 | _ as c { raise (Error c) }

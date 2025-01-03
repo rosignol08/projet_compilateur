@@ -8,6 +8,7 @@ let expr_pos expr =
   match expr with
   | Syntax.Int n  -> n.pos
   | Syntax.String s -> s.pos
+  | Syntax.Bool b -> b.pos
   | Syntax.Call c -> c.pos
 
 let errt expected given pos =
@@ -20,6 +21,7 @@ let rec analyze_expr env expr =
   match expr with
   | Syntax.Int n -> Int n.value, Int_t
   | Syntax.String s -> String s.value, String_t
+  | Syntax.Bool b -> Bool b.value, Bool_t
   | Syntax.Call c ->
     match Env.find_opt c.func env with
     | None -> raise (Error (Printf.sprintf "unknown function '%s'" c.func, c.pos))

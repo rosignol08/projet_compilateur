@@ -14,10 +14,15 @@
 #  ; build_dir = In_build_dir "default"
 #  ; instrument_with = []
 #  }
-$ /usr/bin/ocamlc.opt -config > /tmp/dune_c4e2fd_output
-$ (cd _build/default && /usr/bin/ocamldep.opt -modules -impl compiler.ml) > _build/default/.main.eobjs/dune__exe__Compiler.impl.d
-$ (cd _build/default && /usr/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I .main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o .main.eobjs/byte/dune__exe__Compiler.cmo -c -impl compiler.ml)
+$ /usr/bin/ocamlc.opt -config > /tmp/dune_2f01a8_output
+$ (cd _build/.sandbox/339106471acb01476bf572e75dd28aa9/default && /home/romaric/.opam/default/bin/menhir parser.mly --base parser --infer-write-query parser__mock.ml.mock)
+$ (cd _build/default && /usr/bin/ocamldep.opt -modules -impl parser__mock.ml.mock) > _build/default/.main.eobjs/parser__mock.impl.d
+$ (cd _build/.sandbox/de7c891f4379c3fe99bd89b0aed8a910/default && /usr/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I .main.eobjs/byte -open Dune__exe -short-paths -i -impl parser__mock.ml.mock) > _build/.sandbox/de7c891f4379c3fe99bd89b0aed8a910/default/parser__mock.mli.inferred
+$ (cd _build/.sandbox/cdac921fc1a52e46090cebbe1ad2370f/default && /home/romaric/.opam/default/bin/menhir parser.mly --base parser --infer-read-reply parser__mock.mli.inferred)
+$ (cd _build/default && /usr/bin/ocamldep.opt -modules -impl parser.ml) > _build/default/.main.eobjs/dune__exe__Parser.impl.d
+$ (cd _build/default && /usr/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I .main.eobjs/byte -no-alias-deps -opaque -open Dune__exe -o .main.eobjs/byte/dune__exe__Lexer.cmo -c -impl lexer.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I .main.eobjs/byte -I .main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o .main.eobjs/native/dune__exe__Lexer.cmx -c -impl lexer.ml)
 $ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I .main.eobjs/byte -I .main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o .main.eobjs/native/dune__exe__Main.cmx -c -impl main.ml)
-$ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I .main.eobjs/byte -I .main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o .main.eobjs/native/dune__exe__Compiler.cmx -c -impl compiler.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I .main.eobjs/byte -I .main.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o .main.eobjs/native/dune__exe__Parser.cmx -c -impl parser.ml)
 $ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -o main.exe .main.eobjs/native/dune__exe.cmx .main.eobjs/native/dune__exe__Ast.cmx .main.eobjs/native/dune__exe__Mips.cmx .main.eobjs/native/dune__exe__Baselib.cmx .main.eobjs/native/dune__exe__Compiler.cmx .main.eobjs/native/dune__exe__Parser.cmx .main.eobjs/native/dune__exe__Lexer.cmx .main.eobjs/native/dune__exe__Semantics.cmx .main.eobjs/native/dune__exe__Main.cmx)
 # Promoting "_build/default/main.exe" to "main.exe"

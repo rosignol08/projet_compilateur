@@ -13,7 +13,7 @@ let add_string s =
 let rec compile_expr env expr =
   match expr with
   | Int n -> [ Li (V0, n) ]
-  (*| Bool b -> [ Li (V0, if b then 1 else 0) ]*)
+  | Bool b -> [ Li (V0, if b then 1 else 0) ]
   | String s ->
     let lbl = add_string s in
     [ La (A0, Lbl lbl) ; Li (V0, 4) ; Syscall ]
