@@ -5,6 +5,7 @@ type token =
   | Ltrue of (bool)
   | Lstring of (string)
   | Lplus
+  | Lnot
   | Lint of (int)
   | Lfalse of (bool)
   | Lend

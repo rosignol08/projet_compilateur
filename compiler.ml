@@ -2,20 +2,20 @@ open Ast.IR
 open Mips
 
 let string_table = Hashtbl.create 16
-
-let add_string s =
-  let lbl = "str" ^ string_of_int (Hashtbl.hash s) in
-  if not (Hashtbl.mem string_table lbl) then
+let counter = ref 0
+let add_string s counter =
+  let lbl = "str" ^ string_of_int !counter in
+  if not (Hashtbl.mem string_table lbl) then begin
     Hashtbl.add string_table lbl s;
+    incr counter; (* Incrémente le compteur pour garantir des étiquettes uniques *)
+  end;
   lbl
-
 
 let rec compile_expr env expr =
   match expr with
   | Int n -> [ Li (V0, n) ]
   | Bool b -> [ Li (V0, if b then 1 else 0) ]
-  | String s ->
-    let lbl = add_string s in
+  | String s -> let lbl = add_string s counter in
     [ La (A0, Lbl lbl) ; Li (V0, 4) ; Syscall ]
   | Call (func, args) ->
     List.concat_map

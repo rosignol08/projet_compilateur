@@ -19,4 +19,5 @@ rule token = parse
 | identifier as id { Lstring id }
 | "true" { Ltrue true }
 | "false" { Lfalse false }
+| '!' { Lnot}
 | _ as c { raise (Error c) }

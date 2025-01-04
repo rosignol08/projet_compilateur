@@ -2,6 +2,7 @@
 %token <int> Lint
 %token <string> Lstring
 %token <bool> Ltrue Lfalse
+%token Lnot
 %token Lplus
 
 %left Lplus
@@ -24,3 +25,4 @@ expr:
 | a = expr ; Lplus ; b = expr {
   Call { func = "_add" ; args = [ a ; b ] ; pos = $startpos($2) }
 }
+| Lnot e = expr { Call { func = "_not"; args = [e]; pos = $startpos($1) } }
