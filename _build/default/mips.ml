@@ -4,10 +4,12 @@ type reg =
 | V0
 | A0
 | SP
+| FP
 | T0
 | T1
 | RA
 | ZERO
+
 
 type loc =
 | Lbl of label
@@ -40,6 +42,7 @@ let fmt_reg = function
   | V0 -> "$v0"
   | A0 -> "$a0"
   | SP -> "$sp"
+  | FP -> "$fp"
   | T0 -> "$t0"
   | T1 -> "$t1"
   | RA -> "$ra"

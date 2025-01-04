@@ -18,6 +18,8 @@ module Syntax = struct
   | Int of { value : int ; pos : Lexing.position }
   | String of { value : string ; pos : Lexing.position }
   | Bool of { value : bool ; pos : Lexing.position }
+  | Var of { name : string ; pos : Lexing.position }
+  | Decl of { name : string ; typ : base_t ; pos : Lexing.position }
   | Call of { func : string ; args : expr list ; pos : Lexing.position }
 
   type prog = expr list
@@ -30,6 +32,8 @@ module IR = struct
   | Int of int
   | String of string
   | Bool of bool
+  | Var of string
+  | Decl of string * base_t
   | Call of string * expr list
 
   type prog = expr list

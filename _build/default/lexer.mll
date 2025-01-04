@@ -16,8 +16,11 @@ rule token = parse
 | '\n' { Lexing.new_line lexbuf ; token lexbuf }
 | '+' { Lplus }
 | num as n { Lint (int_of_string n) }
-| identifier as id { Lstring id }
 | "true" { Ltrue true }
 | "false" { Lfalse false }
 | '!' { Lnot}
 | _ as c { raise (Error c) }
+| "int" { Lint_kw }
+| "string" { Lstring_kw }
+| "bool" { Lbool_kw }
+| identifier as id { Lstring id }

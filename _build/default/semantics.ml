@@ -13,6 +13,7 @@ let expr_pos expr =
   | Syntax.Int n  -> n.pos
   | Syntax.String s -> s.pos
   | Syntax.Bool b -> b.pos
+  | Syntax.Var v -> v.pos
   | Syntax.Call c -> c.pos
 
 let errt expected given pos =
@@ -36,7 +37,16 @@ let rec analyze_expr env expr =
   | Syntax.Int n -> Int n.value, Int_t
   | Syntax.String s -> String s.value, String_t
   | Syntax.Bool b -> Bool b.value, Bool_t
-  
+  | Syntax.Var v ->
+    if Env.mem v.name env then
+      Var v.name, Env.find v.name env
+    else
+      raise (Error (Printf.sprintf "unbound variable '%s'" v.name,v.pos))
+  | Syntax.Decl d ->
+    if Env.mem d.name env then
+      raise (Error (Printf.sprintf "variable '%s' already declared" d.name, d.pos))
+    else
+      Decl (d.name, d.typ), d.typ
   | Syntax.Call c when c.func = "_not" -> (* Ajout ici *)
       if List.length c.args <> 1 then
         raise (Error ("'not' expects 1 argument", c.pos));
