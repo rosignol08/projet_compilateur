@@ -8,16 +8,11 @@ _add:
 main:
   addi $sp, $sp, -4
   sw $ra, 0($sp)
-  la $a0, str0
-  li $v0, 4
-  syscall
-  la $a0, str1
-  li $v0, 4
-  syscall
+  addi $sp, $sp, -4
+  li $v0, 1
+  sw $v0, 0($fp)
   lw $ra, 0($sp)
   addi $sp, $sp, 4
   jr $ra
 
 .data
-str1: .asciiz "world"
-str0: .asciiz "hello"

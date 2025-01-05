@@ -1,0 +1,17 @@
+type token =
+    Lvariable of string
+  | Ltypes of Ast.base_t
+  | Ltrue of bool
+  | Lstring of string
+  | Lplus
+  | Lnot
+  | Lint of int
+  | Lfin
+  | Lfalse of bool
+  | Lend
+  | Lassigne
+val menhir_begin_marker : int
+val xv_prog : Ast.Syntax.prog
+val xv_instr : Ast.Syntax.instruction
+val xv_expr : Ast.Syntax.expr
+val menhir_end_marker : int

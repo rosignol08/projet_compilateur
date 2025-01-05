@@ -19,10 +19,15 @@ module Syntax = struct
   | String of { value : string ; pos : Lexing.position }
   | Bool of { value : bool ; pos : Lexing.position }
   | Var of { name : string ; pos : Lexing.position }
-  | Decl of { name : string ; typ : base_t ; pos : Lexing.position }
   | Call of { func : string ; args : expr list ; pos : Lexing.position }
+  
+  type instruction =
+  | Decl of { name : string ; typ : base_t ; pos : Lexing.position }
+  | Assigne of { name : string ; expr : expr ; pos : Lexing.position }
+  
 
-  type prog = expr list
+  
+  type prog = instruction list
 
 end
 
@@ -33,9 +38,12 @@ module IR = struct
   | String of string
   | Bool of bool
   | Var of string
-  | Decl of string * base_t
   | Call of string * expr list
-
-  type prog = expr list
+  
+  type instruction = 
+  | Decl of string
+  | Assigne of string * expr
+  
+  type prog = instruction list
 
 end

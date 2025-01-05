@@ -19,8 +19,10 @@ rule token = parse
 | "true" { Ltrue true }
 | "false" { Lfalse false }
 | '!' { Lnot}
+| ';' { Lfin }
+| "int" { Ltypes(Int_t) }
+| "string" { Ltypes(String_t) }
+| "bool" { Ltypes(Bool_t) }
+| identifier as id { Lvariable id }
+| '=' { Lassigne }
 | _ as c { raise (Error c) }
-| "int" { Lint_kw }
-| "string" { Lstring_kw }
-| "bool" { Lbool_kw }
-| identifier as id { Lstring id }
