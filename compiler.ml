@@ -87,15 +87,15 @@ let rec compile_instr etat instr =
     in
     compile_expr etat.env expr
     @ [ Sw (V0, offset) ], etat  (* Utiliser loc ici *)
-  | Retourne expr ->
-    (* failwith "Not implemented" *)
-    let code_expr = compile_expr etat.env expr in 
-    let code_retour = [ 
-        Lw (RA, Mem (SP, 0)); 
-        Addi (SP, SP, 4); 
-        Jr RA 
-      ] in 
-    code_expr @ code_retour, etat 
+  (*| Retourne expr -> *)
+  (*  (* failwith "Not implemented" *) *)
+  (*  let code_expr = compile_expr etat.env expr in  *)
+  (*  let code_retour = [  *)
+  (*      Lw (RA, Mem (SP, 0));  *)
+  (*      Addi (SP, SP, 4);  *)
+  (*      Jr RA  *)
+  (*    ] in  *)
+    (*code_expr @ code_retour, etat  *)
   | Print ( expr, type_) ->
     let code_expr = compile_expr etat.env expr in
     let code_print = match type_ with
@@ -153,7 +153,7 @@ let rec compile_prog state prog =
     ce @ compile_prog nouvel_env p
 let initial_env = Env.empty;;
 
-let etat_initial = { env = Env.empty; fpo = 0 }
+let etat_initial = { env = Env.empty; fpo = 0 ; code = [] ; counter = 0 }
 
 let compile prog =
   let text =

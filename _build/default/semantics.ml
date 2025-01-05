@@ -73,57 +73,56 @@ let rec analyze_expr env expr =
     
 let rec analyze_instr env instr =
   match instr with
-  | Syntax.Decl d ->
-    if Env.mem d.name env then
-      raise (Error (Printf.sprintf "variable '%s' est deja declaree" d.name, d.pos))
-    else
-      let nouvel_env = Env.add d.name d.typ env in
-      (*Printf.printf "Ajout de la variable '%s' avec le type '%s'\n"
-        d.name (string_of_t d.typ);
-      *)
-      Decl d.name, nouvel_env
-  | Syntax.Assigne a ->
-    if not (Env.mem a.name env) then
-      raise (Error (Printf.sprintf "on a pas trouve la variable '%s'" a.name, a.pos));
-    (*let e, et = analyze_expr env a.expr in *)
-    (*if et <> Env.find a.name env then *)
-    (*  errt (Env.find a.name env) et (expr_pos a.expr); *)
-    (*Assigne (a.name, e), env *)
-    let t = Env.find a.name env in
-    let ae, et = analyze_expr env a.expr in
-    if et = t then
-      Assigne (a.name, ae), env
-    else
-      errt t et (expr_pos a.expr)
-  | Syntax.Retourne r ->
-    failwith "Not implemented"
-    (* let ae, et = analyze_expr env r.expr in *)
-    (* let sortie_pile = Pile.pop stack in *)
-    (* if (et == sortie_pile) then *)
-    (*   Retourne ae, env  *)
-    (* else *)
-    (*   errt sortie_pile et (expr_pos r.expr) *)
-  | Syntax.Print p ->
-    let ae, et = analyze_expr env p.expr in
-    match et with
-    | Int_t | Bool_t | String_t -> Print (ae, et), env
-    | _ -> raise (Error (Printf.sprintf "Type pas supporte par print: %s" (string_of_type_t et), p.pos))
-    
-  (* | Syntax.Condition c ->*)
-  (*   let compar, compar_type = analyze_expr env c.compar in*)
-  (*   if compar_type <> Bool_t then*)
-  (*     raise (Error ("Condition must evaluate to a boolean", c.pos))*)
-  (*   else*)
-  (*     let true_block, env_t = analyze_block env c.tblock in*)
-  (*     let false_block, env_f = analyze_block env_t c.fblock in*)
-  (*     Condition (compar, true_block, false_block), env_f*)
-  | Syntax.Condition c -> 
-    let t, et  = analyze_expr c.compar env in
-    let y, et2 = analyze_block c.tblock env stack in
-    let n, et3 = analyze_block c.fblock et2 stack in
-    Condition (t, y, n), et3
-  
-  
+    | Syntax.Decl d ->
+      if Env.mem d.name env then
+        raise (Error (Printf.sprintf "variable '%s' est deja declaree" d.name, d.pos))
+      else
+        let nouvel_env = Env.add d.name d.typ env in
+        (*Printf.printf "Ajout de la variable '%s' avec le type '%s'\n"
+          d.name (string_of_t d.typ);
+        *)
+        Decl d.name, nouvel_env
+    | Syntax.Assigne a ->
+      if not (Env.mem a.name env) then
+        raise (Error (Printf.sprintf "on a pas trouve la variable '%s'" a.name, a.pos));
+      (*let e, et = analyze_expr env a.expr in *)
+      (*if et <> Env.find a.name env then *)
+      (*  errt (Env.find a.name env) et (expr_pos a.expr); *)
+      (*Assigne (a.name, e), env *)
+      let t = Env.find a.name env in
+      let ae, et = analyze_expr env a.expr in
+      if et = t then
+        Assigne (a.name, ae), env
+      else
+        errt t et (expr_pos a.expr)
+    (*| Syntax.Retourne r -> *)
+    (*  failwith "Not implemented" *)
+      (* let ae, et = analyze_expr env r.expr in *)
+      (* let sortie_pile = Pile.pop stack in *)
+      (* if (et == sortie_pile) then *)
+      (*   Retourne ae, env  *)
+      (* else *)
+      (*   errt sortie_pile et (expr_pos r.expr) *)
+    | Syntax.Print p ->
+      let ae, et = analyze_expr env p.expr in
+      match et with
+      | Int_t | Bool_t | String_t -> IR.Print (ae, et), env
+      | _ -> raise (Error (Printf.sprintf "Type pas supporte par print: %s" (string_of_type_t et), p.pos))
+    (*| Syntax.Condition c ->  *)
+    (*  let t, et  = analyze_expr c.compar env in *)
+    (*  let y, et2 = analyze_block env c.tblock in *)
+    (*  let n, et3 = analyze_block et2 c.fblock in *)
+    (*  Condition (t, y, n), et3 *)
+    | Syntax.Condition _ -> failwith "Unhandled instruction"
+
+    | Syntax.Condition c ->
+      let compar, compar_type = analyze_expr env c.compar in
+      if compar_type <> Bool_t then
+        raise (Error ("Condition must evaluate to a boolean", c.pos))
+      else
+        let true_block, env_t = analyze_block env c.tblock in
+        let false_block, env_f = analyze_block env_t c.fblock in
+        IR.Condition (compar, true_block, false_block), env_f
   
   (* | Syntax.Entree e -> *)
   (*   let var_name = match e.var with *)

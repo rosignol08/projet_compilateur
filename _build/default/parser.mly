@@ -43,7 +43,7 @@ expr:
 instr:
 | t = Ltypes ; v = Lvariable ; Lfin { Decl { name = v; typ = t; pos = $startpos } }
 | v = Lvariable ; Lassigne ; e = expr ; Lfin { Assigne { name = v; expr = e; pos = $startpos } }
-| r = Lreturn ; e = expr ; Lfin { Retourne { expr = e; pos = $startpos(r) } }
+(*| r = Lreturn ; e = expr ; Lfin { Retourne { expr = e; pos = $startpos(r) } } *)
 | Lprintf; Lopar; e = expr; Lfpar; Lfin { Print { expr = e; type_ = Int_t ; pos = $startpos(e) }}
 (*| Lscanf; Lopar; p = Lstring; Lvirgule; v = Lvariable; Lfpar; Lfin { Entree { prompt = p; var = Var { name = v; pos = $startpos(v) }; pos = $startpos(p) }} *)
 | Lif; Lopar; e = expr; Lfpar; Lobra; tb = block; Lcbra; Lelse; Lobra; fb = block; Lcbra { Condition { compar = e; tblock = tb; fblock = fb; pos = $startpos($1) }}

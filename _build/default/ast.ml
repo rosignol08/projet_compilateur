@@ -24,7 +24,7 @@ module Syntax = struct
   type instruction =
   | Decl of { name : string ; typ : base_t ; pos : Lexing.position }
   | Assigne of { name : string ; expr : expr ; pos : Lexing.position }
-  | Retourne of { expr : expr ; pos : Lexing.position }
+  (*| Retourne of { expr : expr ; pos : Lexing.position } *)
   | Print of { expr: expr; type_ : base_t ; pos: Lexing.position }
   (*| Entree of { expr: expr; type_ : base_t ; pos: Lexing.position } *)
   | Condition of { compar: expr; tblock: block; fblock: block; pos: Lexing.position }
@@ -49,7 +49,7 @@ module IR = struct
   type instruction = 
   | Decl of string
   | Assigne of string * expr
-  | Retourne of expr
+  (*| Retourne of expr *)
   | Print of expr * base_t
   | Condition of expr * block * block
   
