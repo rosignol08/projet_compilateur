@@ -6,6 +6,7 @@ type token =
   | Ltypes of (Ast.base_t)
   | Ltrue of (bool)
   | Lstring of (string)
+  | Lreturn
   | Lplus
   | Lnot
   | Lint of (int)

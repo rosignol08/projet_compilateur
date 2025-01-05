@@ -89,13 +89,13 @@ let rec analyze_instr env instr =
       Assigne (a.name, ae), env
     else
       errt t et (expr_pos a.expr)
-    (*else *)
-    (*  let var_type = Env.find a.name env in *)
-    (*  let expr_transformed, expr_type = analyze_expr env a.expr in *)
-    (*  if var_type <> expr_type then *)
-    (*    raise (Error (Printf.sprintf "Type mismatch for variable '%s'" a.name, a.pos)) *)
-    (*  else *)
-    (*    Assigne { name = a.name; expr = expr_transformed }, env *)
+  | Syntax.Retourne r ->
+    let ae, et = analyze_expr env r.expr in
+    let sortie_pile = Pile.pop stack in
+    if (et == sortie_pile) then
+      Retourne ae, env
+    else
+      errt sortie_pile et (expr_pos r.expr)
 
 let rec analyze_prog env prog =
   match prog with

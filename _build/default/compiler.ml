@@ -62,6 +62,15 @@ let rec compile_instr etat instr =
     in
     compile_expr etat.env expr
     @ [ Sw (V0, offset) ], etat  (* Utiliser loc ici *)
+  | Retourne expr ->
+    compile_expr etat.env expr in
+    let code_retour = [
+        Lw (RA, Mem (SP, 0));
+        Addi (SP, SP, 4);
+        Jr RA
+      ] in
+      code_expr @ code_retour, etat
+
       
 
 let rec compile_prog state prog =

@@ -1,2 +1,2 @@
-int aa;
-aa = 1;
+int a;
+a = 1;

@@ -23,6 +23,7 @@ rule token = parse
 | "int" { Ltypes(Int_t) }
 | "string" { Ltypes(String_t) }
 | "bool" { Ltypes(Bool_t) }
+| "return" { Lreturn }
 | identifier as id { Lvariable id }
 | '=' { Lassigne }
 | _ as c { raise (Error c) }
