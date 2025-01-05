@@ -10,28 +10,51 @@ type etat_du_compilo = {
   fpo : int;         (* Offset actuel du frame pointer *)
 }
 
+(* let add_string s counter =  *)
+(*   let lbl = "str" ^ string_of_int !counter in  *)
+(*   if not (Hashtbl.mem string_table lbl) then begin  *)
+(*     Hashtbl.add string_table lbl s;  *)
+(*     incr counter;  *)
+(*   end;  *)
+(*   lbl  *)
+
 let add_string s counter =
-  let lbl = "str" ^ string_of_int !counter in
-  if not (Hashtbl.mem string_table lbl) then begin
-    Hashtbl.add string_table lbl s;
-    incr counter;
-  end;
+  (* Cherche si la chaîne existe déjà dans la table *)
+  let lbl =
+    try
+      Hashtbl.find string_table s
+    with Not_found ->
+      let new_lbl = "str" ^ string_of_int !counter in
+      Hashtbl.add string_table new_lbl s;
+      incr counter;
+      new_lbl
+  in
   lbl
+
+
+(* let add_string s counter = *)
+(*     let lbl = "str" ^ string_of_int !counter in *)
+(*     incr counter; *)
+(*     lbl *)
+
 
 let rec compile_expr (env : int Env.t) expr =
   match expr with
   | Int n -> [ Li (V0, n) ]
   | Bool b -> [ Li (V0, if b then 1 else 0) ]
-  | String s -> let lbl = add_string s counter in
-    [ La (A0, Lbl lbl) ; Li (V0, 4) ; Syscall ]
-    | Var v -> (
-      match Env.find_opt v env with
-      | Some offset ->
-          let loc = Mem (FP, -offset) in
-          [ Lw (V0, loc) ]  (* Charge la valeur depuis la pile *)
-      | None ->
-          failwith (Printf.sprintf "Variable '%s' not found" v)
-    )
+  (* | String s -> let lbl = add_string s counter in *)
+  (*   [ La (A0, Lbl lbl) ; Li (V0, 4) ; Syscall ] *)
+  | String s ->
+    let lbl = add_string s counter in
+    [ La (V0, Lbl lbl) ]  (* Charger l'adresse de la chaîne dans $v0 *)
+  | Var v -> (
+    match Env.find_opt v env with
+    | Some offset ->
+        let loc = Mem (FP, -offset) in
+        [ Lw (V0, loc) ]  (* Charge la valeur depuis la pile *)
+    | None ->
+        failwith (Printf.sprintf "Variable '%s' not found" v)
+  )
     (*[ Lw (V0, Env.find_opt v env)]*)
     (*( *)
     (*match Env.find v env with*)
@@ -63,15 +86,31 @@ let rec compile_instr etat instr =
     compile_expr etat.env expr
     @ [ Sw (V0, offset) ], etat  (* Utiliser loc ici *)
   | Retourne expr ->
-    compile_expr etat.env expr in
-    let code_retour = [
-        Lw (RA, Mem (SP, 0));
-        Addi (SP, SP, 4);
-        Jr RA
-      ] in
-      code_expr @ code_retour, etat
-
-      
+    (* failwith "Not implemented" *)
+    let code_expr = compile_expr etat.env expr in 
+    let code_retour = [ 
+        Lw (RA, Mem (SP, 0)); 
+        Addi (SP, SP, 4); 
+        Jr RA 
+      ] in 
+    code_expr @ code_retour, etat 
+  | Print ( expr, type_) ->
+    let code_expr = compile_expr etat.env expr in
+    let code_print = match type_ with
+      | Int_t -> [ Move (A0, V0)  (* Déplacer l'entier dans $a0 *)
+                 ; Li (V0, 1)     (* Syscall pour afficher un entier *)
+                 ; Syscall ]
+      | Bool_t -> [ Move (A0, V0)  (* Déplacer le booléen dans $a0 *)
+                  ; Li (V0, 1)     (* Syscall pour afficher un entier (0 ou 1) *)
+                  ; Syscall ]
+      | String_t -> [ Move (A0, V0) (* Déplacer l'adresse de la chaîne dans $a0 *)
+                 ; Li (V0, 4) (* Syscall pour afficher une chaîne *)
+                 ; Syscall ]
+      | _ -> failwith "Unsupported type for Print"
+    in
+    code_expr @ code_print , etat
+  
+    
 
 let rec compile_prog state prog =
   match prog with

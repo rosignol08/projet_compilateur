@@ -13,6 +13,7 @@ let identifier = alpha (alpha | num | '-' | '_')*
 rule token = parse
 | eof { Lend }
 | [' ' '\t']+ { token lexbuf }
+| '"' ([^'"']*) '"' { Lstring (String.sub (Lexing.lexeme lexbuf) 1 ((String.length (Lexing.lexeme lexbuf)) - 2)) }
 | '\n' { Lexing.new_line lexbuf ; token lexbuf }
 | '+' { Lplus }
 | num as n { Lint (int_of_string n) }
@@ -20,10 +21,13 @@ rule token = parse
 | "false" { Lfalse false }
 | '!' { Lnot}
 | ';' { Lfin }
+| '(' { Lopar }
+| ')' { Lcpar }
 | "int" { Ltypes(Int_t) }
 | "string" { Ltypes(String_t) }
 | "bool" { Ltypes(Bool_t) }
 | "return" { Lreturn }
+| "print" { Lprintf }
 | identifier as id { Lvariable id }
 | '=' { Lassigne }
 | _ as c { raise (Error c) }

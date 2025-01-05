@@ -25,6 +25,7 @@ module Syntax = struct
   | Decl of { name : string ; typ : base_t ; pos : Lexing.position }
   | Assigne of { name : string ; expr : expr ; pos : Lexing.position }
   | Retourne of { expr : expr ; pos : Lexing.position }
+  | Print of { expr: expr; type_ : base_t ; pos: Lexing.position }
 
   
   type prog = instruction list
@@ -44,7 +45,7 @@ module IR = struct
   | Decl of string
   | Assigne of string * expr
   | Retourne of expr
-  
+  | Print of expr * base_t
   type prog = instruction list
 
 end

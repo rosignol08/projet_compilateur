@@ -29,6 +29,7 @@ type instr =
 | And of reg * reg * reg
 | Or of reg * reg * reg
 | Not of reg * reg
+| Move of reg * reg
 | Syscall
 
 type directive =
@@ -66,6 +67,7 @@ let fmt_instr = function
   | And (rd, r1, r2) -> Printf.sprintf "  and %s, %s, %s" (fmt_reg rd) (fmt_reg r1) (fmt_reg r2)
   | Or (rd, r1, r2)  -> Printf.sprintf "  or %s, %s, %s" (fmt_reg rd) (fmt_reg r1) (fmt_reg r2)
   | Not (rd, r)      -> Printf.sprintf "  not %s, %s" (fmt_reg rd) (fmt_reg r)
+  | Move (rd, rs)     -> Printf.sprintf "move %s, %s" (fmt_reg rd) (fmt_reg rs)
   | Syscall          -> "  syscall"
 
 let fmt_dir = function

@@ -10,7 +10,7 @@ open Ast
 %token Lnot
 %token Lplus
 %token Lfin
-%token Lassigne Lreturn
+%token Lassigne Lreturn Lprintf Lopar Lcpar
 
 %left Lplus
 
@@ -37,3 +37,4 @@ instr:
 | t = Ltypes ; v = Lvariable ; Lfin { Decl { name = v; typ = t; pos = $startpos } }
 | v = Lvariable ; Lassigne ; e = expr ; Lfin { Assigne { name = v; expr = e; pos = $startpos } }
 | r = Lreturn ; e = expr ; Lfin { Retourne { expr = e; pos = $startpos(r) } }
+| Lprintf; Lopar; e = expr; Lcpar; Lfin { Print { expr = e; type_ = Int_t ; pos = $startpos(e) }}

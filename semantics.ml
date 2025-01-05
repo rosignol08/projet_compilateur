@@ -2,6 +2,12 @@ open Ast
 open Ast.IR
 open Baselib
 
+let string_of_type_t = function
+  | Int_t -> "int"
+  | Bool_t -> "bool"
+  | String_t -> "string"
+  | Func_t (_, _) -> "function"
+
 let counter = ref 0
 (*let str_env = ref Env.empty*)
 
@@ -90,13 +96,18 @@ let rec analyze_instr env instr =
     else
       errt t et (expr_pos a.expr)
   | Syntax.Retourne r ->
-    let ae, et = analyze_expr env r.expr in
-    let sortie_pile = Pile.pop stack in
-    if (et == sortie_pile) then
-      Retourne ae, env
-    else
-      errt sortie_pile et (expr_pos r.expr)
-
+    failwith "Not implemented"
+    (* let ae, et = analyze_expr env r.expr in *)
+    (* let sortie_pile = Pile.pop stack in *)
+    (* if (et == sortie_pile) then *)
+    (*   Retourne ae, env  *)
+    (* else *)
+    (*   errt sortie_pile et (expr_pos r.expr) *)
+  | Syntax.Print p ->
+    let ae, et = analyze_expr env p.expr in
+    match et with
+    | Int_t | Bool_t | String_t -> Print (ae, et), env
+    | _ -> raise (Error (Printf.sprintf "Unsupported type for Print: %s" (string_of_type_t et), p.pos))
 let rec analyze_prog env prog =
   match prog with
   | [] -> []
