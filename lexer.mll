@@ -21,13 +21,17 @@ rule token = parse
 | "false" { Lfalse false }
 | '!' { Lnot}
 | ';' { Lfin }
+| ',' { Lvirgule }
 | '(' { Lopar }
-| ')' { Lcpar }
+| ')' { Lfpar }
 | "int" { Ltypes(Int_t) }
 | "string" { Ltypes(String_t) }
 | "bool" { Ltypes(Bool_t) }
 | "return" { Lreturn }
 | "print" { Lprintf }
+| "entree" { Lscanf }
+| "if" { Lif }
+| "else" { Lelse }
 | identifier as id { Lvariable id }
 | '=' { Lassigne }
 | _ as c { raise (Error c) }

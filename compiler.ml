@@ -8,6 +8,8 @@ let counter = ref 0
 type etat_du_compilo = {
   env : int Env.t;   (* Associe les variables à leurs indices *)
   fpo : int;         (* Offset actuel du frame pointer *)
+  code : instruction list;  (* Code généré *)
+  counter : int;     (* Compteur pour les labels *)
 }
 
 (* let add_string s counter =  *)
@@ -106,11 +108,42 @@ let rec compile_instr etat instr =
       | String_t -> [ Move (A0, V0) (* Déplacer l'adresse de la chaîne dans $a0 *)
                  ; Li (V0, 4) (* Syscall pour afficher une chaîne *)
                  ; Syscall ]
-      | _ -> failwith "Unsupported type for Print"
+      | _ -> failwith "Type pas supporte pour Print"
     in
     code_expr @ code_print , etat
+  | Condition (compar, tblock, fblock) ->
+    let uniq = string_of_int etat.counter in
+    let true_code, true_state = compile_block etat tblock in
+    let false_code, false_state = compile_block true_state fblock in
+    ([ Label ("if" ^ uniq) ]
+     @ compile_expr etat.env compar
+     @ [ Beqz (V0, "else" ^ uniq) ]  (* Sauter au bloc else si la condition est fausse *)
+     @ true_code
+     @ [ B ("endif" ^ uniq); Label ("else" ^ uniq) ]  (* Sauter à la fin après le bloc then *)
+     @ false_code
+     @ [ Label ("endif" ^ uniq) ] , false_state)
   
-    
+  
+  (*| Entree (prompt, var) -> *)
+  (*  let code_prompt = [ La (A0, Lbl (add_string prompt counter)) *)
+  (*                    ; Li (V0, 4)   *)
+  (*                    ; Syscall ] *)
+  (*  in *)
+  (*  let code_read = [ Li (V0, 5) *)
+  (*                  ; Syscall *)
+  (*                  ; Sw (V0, Mem (FP, - (Env.find var etat.env))) *)
+  (*                  ] *)
+  (*  in *)
+  (*  code_prompt @ code_read , etat *)
+  
+and compile_block state block =
+  match block with
+  | [] -> [], state
+  | instr :: rest ->
+      let ci, new_state = compile_instr state instr in
+      let cb, final_state = compile_block new_state rest in
+      (ci @ cb), final_state
+  
 
 let rec compile_prog state prog =
   match prog with

@@ -22,6 +22,8 @@ type instr =
 | La of reg * loc
 | Addi of reg * reg * int
 | Add of reg * reg * reg
+| B of label
+| Beqz of reg * label
 | Sw of reg * loc
 | Lw of reg * loc
 | Jal of loc
@@ -60,6 +62,8 @@ let fmt_instr = function
   | La (r, l)        -> Printf.sprintf "  la %s, %s" (fmt_reg r) (fmt_loc l)
   | Addi (rd, r, i)  -> Printf.sprintf "  addi %s, %s, %d" (fmt_reg rd) (fmt_reg r) i
   | Add (rd, r1, r2) -> Printf.sprintf "  add %s, %s, %s" (fmt_reg rd) (fmt_reg r1) (fmt_reg r2)
+  | B l        -> Printf.sprintf "  b %s" l
+  | Beqz (r, l)        -> Printf.sprintf "  beqz %s, %s" (fmt_reg r) l
   | Sw (r, l)        -> Printf.sprintf "  sw %s, %s" (fmt_reg r) (fmt_loc l)
   | Lw (r, l)        -> Printf.sprintf "  lw %s, %s" (fmt_reg r) (fmt_loc l)
   | Jal l            -> Printf.sprintf "  jal %s" (fmt_loc l)

@@ -107,7 +107,47 @@ let rec analyze_instr env instr =
     let ae, et = analyze_expr env p.expr in
     match et with
     | Int_t | Bool_t | String_t -> Print (ae, et), env
-    | _ -> raise (Error (Printf.sprintf "Unsupported type for Print: %s" (string_of_type_t et), p.pos))
+    | _ -> raise (Error (Printf.sprintf "Type pas supporte par print: %s" (string_of_type_t et), p.pos))
+    
+  (* | Syntax.Condition c ->*)
+  (*   let compar, compar_type = analyze_expr env c.compar in*)
+  (*   if compar_type <> Bool_t then*)
+  (*     raise (Error ("Condition must evaluate to a boolean", c.pos))*)
+  (*   else*)
+  (*     let true_block, env_t = analyze_block env c.tblock in*)
+  (*     let false_block, env_f = analyze_block env_t c.fblock in*)
+  (*     Condition (compar, true_block, false_block), env_f*)
+  | Syntax.Condition c -> 
+    let t, et  = analyze_expr c.compar env in
+    let y, et2 = analyze_block c.tblock env stack in
+    let n, et3 = analyze_block c.fblock et2 stack in
+    Condition (t, y, n), et3
+  
+  
+  
+  (* | Syntax.Entree e -> *)
+  (*   let var_name = match e.var with *)
+  (*     | Var { name; _ } -> name *)
+  (*     | _ -> raise (Error ("Expected a variable in Entree", e.pos)) *)
+  (*   in *)
+  (*   if not (Env.mem var_name env) then *)
+  (*     raise (Error (Printf.sprintf "Variable '%s' is not declared" var_name, e.pos)) *)
+  (*   else *)
+  (*     let var_typ = Env.find var_name env in *)
+  (*     if var_typ = Int_t || var_typ = Str_t then *)
+  (*       IR.Entree (e.prompt, var_name), env *)
+  (*     else *)
+  (*       raise (Error (Printf.sprintf "Unsupported type for variable '%s'" var_name, e.pos)) *)
+  (* | Syntax.Entree _ -> failwith "Unhandled instruction" *)
+
+and analyze_block env block =
+  match block with
+  | [] -> [], env
+  | instr :: rest ->
+      let analyzed_instr, new_env = analyze_instr env instr in
+      let analyzed_rest, final_env = analyze_block new_env rest in
+      (analyzed_instr :: analyzed_rest, final_env)
+
 let rec analyze_prog env prog =
   match prog with
   | [] -> []

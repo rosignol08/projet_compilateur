@@ -26,6 +26,11 @@ module Syntax = struct
   | Assigne of { name : string ; expr : expr ; pos : Lexing.position }
   | Retourne of { expr : expr ; pos : Lexing.position }
   | Print of { expr: expr; type_ : base_t ; pos: Lexing.position }
+  (*| Entree of { expr: expr; type_ : base_t ; pos: Lexing.position } *)
+  | Condition of { compar: expr; tblock: block; fblock: block; pos: Lexing.position }
+
+  and block = instruction list
+  
 
   
   type prog = instruction list
@@ -46,6 +51,10 @@ module IR = struct
   | Assigne of string * expr
   | Retourne of expr
   | Print of expr * base_t
+  | Condition of expr * block * block
+  
+  and block = instruction list
+  (*| Entree of expr * base_t *)
   type prog = instruction list
 
 end

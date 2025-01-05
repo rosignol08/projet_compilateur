@@ -1,21 +1,28 @@
 type token =
-    Lvariable of string
+    Lvirgule
+  | Lvariable of string
   | Ltypes of Ast.base_t
   | Ltrue of bool
   | Lstring of string
+  | Lscanf
   | Lreturn
   | Lprintf
   | Lplus
   | Lopar
+  | Lobra
   | Lnot
   | Lint of int
+  | Lif
+  | Lfpar
   | Lfin
   | Lfalse of bool
   | Lend
-  | Lcpar
+  | Lelse
+  | Lcbra
   | Lassigne
 val menhir_begin_marker : int
 val xv_prog : Ast.Syntax.prog
 val xv_instr : Ast.Syntax.instruction
 val xv_expr : Ast.Syntax.expr
+val xv_block : Ast.Syntax.block
 val menhir_end_marker : int
