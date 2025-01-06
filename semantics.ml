@@ -82,6 +82,7 @@ let rec analyze_instr env instr =
           d.name (string_of_t d.typ);
         *)
         Decl d.name, nouvel_env
+
     | Syntax.Assigne a ->
       if not (Env.mem a.name env) then
         raise (Error (Printf.sprintf "on a pas trouve la variable '%s'" a.name, a.pos));
@@ -95,6 +96,17 @@ let rec analyze_instr env instr =
         Assigne (a.name, ae), env
       else
         errt t et (expr_pos a.expr)
+    | Syntax.DeclAssigne da ->
+      if Env.mem da.name env then
+        raise (Error (Printf.sprintf "Variable '%s' est deja declaree" da.name, da.pos))
+      else
+        let ae, et = analyze_expr env da.expr in
+        if et = da.typ then
+          let nouvel_env = Env.add da.name da.typ env in
+          DeclAssigne (da.name, ae), nouvel_env
+        else
+          errt da.typ et da.pos
+        
     (*| Syntax.Retourne r -> *)
     (*  failwith "Not implemented" *)
       (* let ae, et = analyze_expr env r.expr in *)
@@ -105,16 +117,16 @@ let rec analyze_instr env instr =
       (*   errt sortie_pile et (expr_pos r.expr) *)
     | Syntax.Print p ->
       let ae, et = analyze_expr env p.expr in
+      begin
       match et with
       | Int_t | Bool_t | String_t -> Print (ae, et), env
       | _ -> raise (Error (Printf.sprintf "Type pas supporte par print: %s" (string_of_type_t et), p.pos))
+      end
     (*| Syntax.Condition c ->  *)
     (*  let t, et  = analyze_expr c.compar env in *)
     (*  let y, et2 = analyze_block env c.tblock in *)
     (*  let n, et3 = analyze_block et2 c.fblock in *)
     (*  Condition (t, y, n), et3 *)
-    | Syntax.Condition _ -> failwith "Unhandled instruction"
-
     | Syntax.Condition c ->
       let compar, compar_type = analyze_expr env c.compar in
       if compar_type <> Bool_t then

@@ -11,18 +11,24 @@ type token =
   | Lopar
   | Lobra
   | Lnot
+  | Lneq
+  | Llt
+  | Lle
   | Lint of int
   | Lif
+  | Lgt
+  | Lge
   | Lfpar
   | Lfin
+  | Lfbra
   | Lfalse of bool
+  | Leq
   | Lend
   | Lelse
-  | Lcbra
   | Lassigne
 val menhir_begin_marker : int
 val xv_prog : Ast.Syntax.prog
-val xv_instr : Ast.Syntax.instruction
+val xv_instruction : Ast.Syntax.instruction
 val xv_expr : Ast.Syntax.expr
 val xv_block : Ast.Syntax.block
 val menhir_end_marker : int

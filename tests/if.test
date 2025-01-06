@@ -1,0 +1,11 @@
+if (0) { print("Never executed"); }
+else { print("Always executed"); }
+
+
+  | Print (e,typet) -> 
+    let compiled_expr = compile_expr env e in
+    match typet with 
+    | Int_t -> code @ compiled_expr @ [Jal (Lbl "_print_int")] , env , fpo , counter
+    | Bool_t -> code @ compiled_expr @ [Jal (Lbl "_print_int")] , env , fpo , counter
+    | Str_t -> code @ compiled_expr @ [Jal (Lbl "_printstr")] , env , fpo , counter
+    |  -> failwith "Print impossible"

@@ -24,14 +24,22 @@ rule token = parse
 | ',' { Lvirgule }
 | '(' { Lopar }
 | ')' { Lfpar }
+| '{' { Lobra }
+| '}' { Lfbra }
+| "==" { Leq }
+| "!=" { Lneq }
+| "<"  { Llt }
+| ">"  { Lgt }
+| "<=" { Lle }
+| ">=" { Lge }
+| "if" { Lif }
+| "else" { Lelse }
 | "int" { Ltypes(Int_t) }
 | "string" { Ltypes(String_t) }
 | "bool" { Ltypes(Bool_t) }
 | "return" { Lreturn }
 | "print" { Lprintf }
 | "entree" { Lscanf }
-| "if" { Lif }
-| "else" { Lelse }
 | identifier as id { Lvariable id }
 | '=' { Lassigne }
 | _ as c { raise (Error c) }

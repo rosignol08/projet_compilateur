@@ -25,6 +25,12 @@ type instr =
 | B of label
 | Beqz of reg * label
 | Sw of reg * loc
+| Seq of reg * reg * reg
+| Sne of reg * reg * reg
+| Slt of reg * reg * reg
+| Sgt of reg * reg * reg
+| Sle of reg * reg * reg
+| Sge of reg * reg * reg
 | Lw of reg * loc
 | Jal of loc
 | Jr of reg
@@ -65,6 +71,12 @@ let fmt_instr = function
   | B l        -> Printf.sprintf "  b %s" l
   | Beqz (r, l)        -> Printf.sprintf "  beqz %s, %s" (fmt_reg r) l
   | Sw (r, l)        -> Printf.sprintf "  sw %s, %s" (fmt_reg r) (fmt_loc l)
+  | Seq (rd, rs, rt)        -> Printf.sprintf "seq %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Sne (rd, rs, rt)        -> Printf.sprintf "sne %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Slt (rd, rs, rt)        -> Printf.sprintf "slt %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Sgt (rd, rs, rt)        -> Printf.sprintf "sgt %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Sle (rd, rs, rt)        -> Printf.sprintf "sle %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Sge (rd, rs, rt)        -> Printf.sprintf "sge %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
   | Lw (r, l)        -> Printf.sprintf "  lw %s, %s" (fmt_reg r) (fmt_loc l)
   | Jal l            -> Printf.sprintf "  jal %s" (fmt_loc l)
   | Jr r             -> Printf.sprintf "  jr %s" (fmt_reg r)

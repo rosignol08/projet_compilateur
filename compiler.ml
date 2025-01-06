@@ -40,7 +40,7 @@ let add_string s counter =
 (*     lbl *)
 
 
-let rec compile_expr (env : int Env.t) expr =
+let rec compile_expr etat expr =
   match expr with
   | Int n -> [ Li (V0, n) ]
   | Bool b -> [ Li (V0, if b then 1 else 0) ]
@@ -50,21 +50,43 @@ let rec compile_expr (env : int Env.t) expr =
     let lbl = add_string s counter in
     [ La (V0, Lbl lbl) ]  (* Charger l'adresse de la chaîne dans $v0 *)
   | Var v -> (
-    match Env.find_opt v env with
+    match Env.find_opt v etat.env with
     | Some offset ->
-        let loc = Mem (FP, -offset) in
-        [ Lw (V0, loc) ]  (* Charge la valeur depuis la pile *)
+      Printf.printf "Accès à la variable '%s' à l'offset %d (calculé depuis FP)\n" v offset;
+      let loc = Mem (FP, -offset) in
+      [ Lw (V0, loc) ]  (* Charge la valeur depuis la pile *)
     | None ->
-        failwith (Printf.sprintf "Variable '%s' not found" v)
+      failwith (Printf.sprintf "Variable '%s' not found" v)
   )
     (*[ Lw (V0, Env.find_opt v env)]*)
     (*( *)
     (*match Env.find v env with*)
     (*| None -> [Addi (SP, SP, -4) ; Sw (V0, Mem (SP, 0))]*)
     (*| Some nom -> [ Lw (V0, Mem (SP, 0)) ; Addi (SP, SP, 4) ])*)
-  | Call (func, args) ->
+    | Call (func, args) when List.mem func ["%eq"; "%neq"; "%lt"; "%gt"; "%le"; "%ge"] ->
+      (* Vérifier que le nombre d'arguments est correct *)
+      if List.length args <> 2 then
+        failwith (Printf.sprintf "Operator '%s' expects 2 arguments" func);
+  
+      (* Compiler les arguments gauche et droite *)
+      let left = List.nth args 0 in
+      let right = List.nth args 1 in
+      compile_expr etat left
+      @ [ Addi (SP, SP, -4); Sw (V0, Mem (SP, 0)) ]  (* Empiler la valeur gauche *)
+      @ compile_expr etat right
+      @ [ Lw (T0, Mem (SP, 0)); Addi (SP, SP, 4) ]  (* Dépiler la valeur gauche dans T0 *)
+      @ (match func with
+         | "%eq" -> [ Seq (V0, T0, V0) ]  (* V0 = (T0 == V0) *)
+         | "%neq" -> [ Sne (V0, T0, V0) ] (* V0 = (T0 != V0) *)
+         | "%lt" -> [ Slt (V0, T0, V0) ]  (* V0 = (T0 < V0) *)
+         | "%gt" -> [ Sgt (V0, T0, V0) ]  (* V0 = (T0 > V0) *)
+         | "%le" -> [ Sle (V0, T0, V0) ]  (* V0 = (T0 <= V0) *)
+         | "%ge" -> [ Sge (V0, T0, V0) ]  (* V0 = (T0 >= V0) *)
+         | _ -> failwith "Unsupported operator")
+  
+    | Call (func, args) ->
     List.concat_map
-      (fun a -> compile_expr env a @ [ Addi (SP, SP, -4) ; Sw (V0, Mem (SP, 0)) ])
+      (fun a -> compile_expr etat a @ [ Addi (SP, SP, -4) ; Sw (V0, Mem (SP, 0)) ])
       args
     @ [ Jal (Lbl func) ; Addi (SP, SP, 4 * List.length args) ]
 
@@ -74,19 +96,41 @@ let rec compile_instr etat instr =
       if Env.mem name etat.env then
         failwith (Printf.sprintf "Variable '%s' is already declared" name)
       else
+        
+        (*let offset = etat.fpo in *)  (* le fpo actuel *)
+        let offset = etat.fpo + 4 in
+        let env = Env.add name offset etat.env in
+        let etat = { etat with env; fpo = etat.fpo + 4 } in  (* avance fpo de 4 pour la prochaine variable *)
+        Printf.printf "Ajout de la variable '%s' avec l'offset -%d\n" name offset;
         (* Ajout de la variable à l'environnement *)
-        let env = Env.add name etat.fpo etat.env in
-        let etat = { etat with env; fpo = etat.fpo + 4 } in
+        (* let env = Env.add name etat.fpo etat.env in *)
+        (* let etat = { etat with env; fpo = etat.fpo + 4 } in *)
         (* ça réserve de l'espace dans la pile *)
-        [ Addi (SP, SP, -4) ], etat
+        (*[ Addi (SP, SP, -4) ]*)[], etat
+        
+
+        
   | Assigne (name, expr) ->
     let offset =
       match Env.find_opt name etat.env with
       | Some o -> Mem (FP, -o)  (* Convertir l'offset en loc *)
       | None -> failwith (Printf.sprintf "La variable '%s' pas trouvee" name)
     in
-    compile_expr etat.env expr
+    let offset_int = (match offset with Mem (_, off) -> off | _ -> failwith "Unexpected offset type" )in
+    Printf.printf "Assignation à la variable '%s' à l'offset %d (calculé depuis FP)\n" name offset_int;
+    compile_expr etat expr
     @ [ Sw (V0, offset) ], etat  (* Utiliser loc ici *)
+  
+    | DeclAssigne (name, expr) ->
+      let offset = etat.fpo in  (* Calculer l'offset actuel *)
+      let env = Env.add name offset etat.env in
+      let etat = { etat with env; fpo = etat.fpo + 4 } in  (* Incrémenter après *)
+      Printf.printf "Ajout de la variable '%s' avec l'offset -%d\n" name offset;
+      compile_expr etat expr  (* Compiler l'expression *)
+      @ [ Sw (V0, Mem (FP, -offset)) ],etat  (* Utiliser l'offset réservé *)
+  
+
+  
   (*| Retourne expr -> *)
   (*  (* failwith "Not implemented" *) *)
   (*  let code_expr = compile_expr etat.env expr in  *)
@@ -97,9 +141,11 @@ let rec compile_instr etat instr =
   (*    ] in  *)
     (*code_expr @ code_retour, etat  *)
   | Print ( expr, type_) ->
-    let code_expr = compile_expr etat.env expr in
+    let code_expr = compile_expr etat expr in
     let code_print = match type_ with
-      | Int_t -> [ Move (A0, V0)  (* Déplacer l'entier dans $a0 *)
+      | Int_t ->
+        Printf.printf "chercher à l'adresse %d\n" etat.fpo; 
+        [ Move (A0, V0)  (* Déplacer l'entier dans $a0 *)
                  ; Li (V0, 1)     (* Syscall pour afficher un entier *)
                  ; Syscall ]
       | Bool_t -> [ Move (A0, V0)  (* Déplacer le booléen dans $a0 *)
@@ -116,7 +162,7 @@ let rec compile_instr etat instr =
     let true_code, true_state = compile_block etat tblock in
     let false_code, false_state = compile_block true_state fblock in
     ([ Label ("if" ^ uniq) ]
-     @ compile_expr etat.env compar
+     @ compile_expr etat compar
      @ [ Beqz (V0, "else" ^ uniq) ]  (* Sauter au bloc else si la condition est fausse *)
      @ true_code
      @ [ B ("endif" ^ uniq); Label ("else" ^ uniq) ]  (* Sauter à la fin après le bloc then *)
@@ -153,14 +199,24 @@ let rec compile_prog state prog =
     ce @ compile_prog nouvel_env p
 let initial_env = Env.empty;;
 
-let etat_initial = { env = Env.empty; fpo = 0 ; code = [] ; counter = 0 }
+let etat_initial = { env = Env.empty; fpo = 8 ; code = [] ; counter = 0 }
 
 let compile prog =
   let text =
     Baselib.stdlib
-    @ [ Label "main" ; Addi (SP, SP, -4) ; Sw (RA, Mem (SP, 0)) ]
+    (*; Move (FP, SP)*)
+    @ [ Label "main"
+    ; Addi (SP, SP, -etat_initial.fpo) 
+    ; Sw (RA, Mem (SP, etat_initial.fpo - 4))
+    ; Sw (FP, Mem (SP, etat_initial.fpo))
+    ; Move (FP, SP)
+    (*; Addi (FP, SP, etat_initial.fpo - 4) *)
+    ]
     @ compile_prog etat_initial prog (*verif si ça marche*)
-    @ [ Lw (RA, Mem (SP, 0)) ; Addi (SP, SP, 4) ; Jr RA ]
+    @ [Lw (RA, Mem (SP, etat_initial.fpo - 4))
+    ; Lw (FP, Mem (SP, etat_initial.fpo))
+    ; Addi (SP, SP, etat_initial.fpo) 
+    ; Jr RA ]
   in
   let data =
     Hashtbl.fold (fun lbl s acc -> (lbl, Asciiz s) :: acc) string_table []

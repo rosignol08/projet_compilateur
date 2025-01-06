@@ -14,14 +14,20 @@ type token =
   | Lopar
   | Lobra
   | Lnot
+  | Lneq
+  | Llt
+  | Lle
   | Lint of (int)
   | Lif
+  | Lgt
+  | Lge
   | Lfpar
   | Lfin
+  | Lfbra
   | Lfalse of (bool)
+  | Leq
   | Lend
   | Lelse
-  | Lcbra
   | Lassigne
 
 (* This exception is raised by the monolithic API functions. *)
