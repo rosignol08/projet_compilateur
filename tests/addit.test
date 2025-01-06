@@ -1,0 +1,29 @@
+def main(){}
+    int a = 5;
+    int b = 3;
+    int c = a + b;
+    print(c);
+    print("\n");
+
+    while ( c < 10){
+        print("c plus petit que 10 \n");
+        c = c + 1;
+    }
+
+    int comp = c%3;
+    print(comp);
+    print("\n");
+
+    c = c+1;
+
+    if c <= 10{
+        print("c plus petit que 10\n");
+        print(c);
+        print("\n");
+    } else{
+        print("c plus grand que 10\n");
+        print(c);
+        print("\n");
+    }
+    print("c = ");
+    print(c);

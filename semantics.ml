@@ -2,6 +2,7 @@ open Ast
 open Ast.IR
 open Baselib
 
+
 let string_of_type_t = function
   | Int_t -> "int"
   | Bool_t -> "bool"
@@ -84,7 +85,7 @@ let rec analyze_expr env expr =
       | Some _ -> raise (Error (Printf.sprintf "'%s' is not a function" c.func, c.pos))
     
     
-let rec analyze_instr env instr =
+let rec analyze_instr env instr la_pile =
   match instr with
     | Syntax.Decl d ->
       if Env.mem d.name env then
@@ -135,18 +136,21 @@ let rec analyze_instr env instr =
       | Int_t | Bool_t | String_t -> Print (ae, et), env
       | _ -> raise (Error (Printf.sprintf "Type pas supporte par print: %s" (string_of_type_t et), p.pos))
       end
-    (*| Syntax.Condition c ->  *)
-    (*  let t, et  = analyze_expr c.compar env in *)
-    (*  let y, et2 = analyze_block env c.tblock in *)
-    (*  let n, et3 = analyze_block et2 c.fblock in *)
-    (*  Condition (t, y, n), et3 *)
+
     | Syntax.Condition c ->
       let compar, compar_type = analyze_expr env c.compar in
       if compar_type <> Bool_t then
         raise (Error ("Condition doit etre un booleen", expr_pos c.compar));
-      let true_block, env_t = analyze_block env c.tblock in
-      let false_block, env_f = analyze_block env_t c.fblock in
+      let true_block, env_t = analyze_block env c.tblock la_pile in
+      let false_block, env_f = analyze_block env_t c.fblock la_pile in
       Condition (compar, true_block, false_block), env_f
+    | Syntax.Boucle l ->
+      let condition, condition_type = analyze_expr env l.expr in
+      if condition_type <> Bool_t then
+        raise (Error ("Condition must evaluate to a boolean", expr_pos l.expr));
+      let boucle_block, env_in_boucle = analyze_block env l.b la_pile in
+      Boucle (condition, boucle_block), env_in_boucle
+    
   
 (*  | Syntax.Entree e -> *)
 (*    let var_name = match e.var with *)
@@ -163,20 +167,70 @@ let rec analyze_instr env instr =
 (*        raise (Error (Printf.sprintf "Unsupported type for variable '%s'" var_name, e.pos)) *)
   | Syntax.Entree _ -> failwith "Unhandled instruction"
 
-and analyze_block env block =
+and analyze_block env block la_pile =
   match block with
   | [] -> [], env
   | instr :: rest ->
-      let analyzed_instr, new_env = analyze_instr env instr in
-      let analyzed_rest, final_env = analyze_block new_env rest in
+      let analyzed_instr, new_env = analyze_instr env instr la_pile in
+      let analyzed_rest, final_env = analyze_block new_env rest la_pile in
       (analyzed_instr :: analyzed_rest, final_env)
+let analyze_func env func la_pile =
+  match func with
+  | Syntax.Func f ->
+    let args = [] in
+    let la_pile = Stack.push f.typ la_pile in
+      
+      (* Construisez l'environnement pour les arguments *)
+      let new_env = List.fold_left (fun acc arg ->
+        if Env.mem arg acc then
+          raise (Error (Printf.sprintf "Duplicate argument '%s'" arg, f.pos))
+        else
+          Env.add arg Int_t acc (* TODO : gérer les types des arguments si nécessaire *)
+      ) env f.args in
 
-let rec analyze_prog env prog =
-  match prog with
-  | [] -> []
-  | e :: p ->
-    let ae, nouvel_env = analyze_instr env e in
-    ae :: analyze_prog nouvel_env p
+      (* Analysez le bloc de la fonction *)
+      let block, final_env = analyze_block new_env f.block la_pile in
 
+      (* Vérifiez si la fonction existe déjà dans l'environnement *)
+      IR.Func (f.typ, f.name, f.args, block),
+      if Env.mem f.name env then
+        raise (Error (Printf.sprintf "Function '%s' deja definie" f.name, f.pos))
+      else
+        Env.add f.name (Func_t (f.typ, List.map (fun _ -> Int_t) f.args)) env
+      
+
+(* let rec analyze_prog env prog la_pile= *)
+(*   match prog with *)
+(*   | [] -> [] *)
+(*   | e :: p -> *)
+(*     let ae, nouvel_env = analyze_func env e la_pile in *)
+(*     ae :: analyze_prog nouvel_env p la_pile *)
+
+let analyze_prog env prog stack =
+  (* Vérifie que 'main' existe *)
+  let has_main = List.exists (function
+    | Syntax.Func f when f.name = "main" -> true
+    | _ -> false
+  ) prog in
+
+  if not has_main then
+    raise (Error ("Le programme doit contenir une fonction 'main' sans arguments de type int", Lexing.dummy_pos));
+
+  (* Analyse chaque fonction ou instruction *)
+  let rec analyze_all env prog stack =
+    match prog with
+    | [] -> [], env
+    | func :: rest ->
+      let analyzed_func, new_env = analyze_func env func stack in
+      let analyzed_rest, final_env = analyze_all new_env rest stack in
+      analyzed_func :: analyzed_rest, final_env
+  in
+
+  analyze_all env prog stack
+
+
+(* let analyze prog = *)
+(*   analyze_prog Baselib.types prog (Stack.create()) *)
 let analyze prog =
-  analyze_prog Baselib.types prog
+  let ir, _ = analyze_prog Baselib.types prog (Stack.create()) in
+  ir

@@ -4,7 +4,7 @@ open Mips
 module Env = Map.Make(String)
 
 let types =
-  Env.of_seq (List.to_seq [
+  Env.of_list [
     "_add", Func_t (Int_t, [ Int_t ; Int_t ]);
     "_not", Func_t (Bool_t, [ Bool_t ]);
     "_lt", Func_t (Bool_t, [ Int_t ; Int_t ]);
@@ -13,13 +13,72 @@ let types =
     "_neq", Func_t (Bool_t, [ Int_t ; Int_t ]);
     "_le", Func_t (Bool_t, [ Int_t ; Int_t ]);
     "_ge", Func_t (Bool_t, [ Int_t ; Int_t ]);
-  ])
+    "_add", Func_t (Int_t, [ Int_t ; Int_t ]);
+    "_sub", Func_t (Int_t, [ Int_t ; Int_t ]);
+    "_mul", Func_t (Int_t, [ Int_t ; Int_t ]);
+    "_div", Func_t (Int_t, [ Int_t ; Int_t ]);
+    "_mod", Func_t (Int_t, [ Int_t ; Int_t ]);
+    "_and", Func_t (Bool_t, [ Bool_t ; Bool_t ]);
+    "_or",  Func_t (Bool_t, [ Bool_t ; Bool_t ]);
+    "_xor", Func_t (Int_t, [ Int_t ; Int_t ])
+  ]
 
 let stdlib =
   [ Label "_add"
   ; Lw (T0, Mem (SP, 4))
   ; Lw (T1, Mem (SP, 0))
   ; Add (V0, T0, T1)
+  ; Jr RA
+
+  (* Soustraction *)
+  ; Label "_sub"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Sub (V0, T0, T1)
+  ; Jr RA
+
+  (* Multiplication *)
+  ; Label "_mul"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Mul (V0, T0, T1)
+  ; Jr RA
+
+  (* Division *)
+  ; Label "_div"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Div (V0, T0, T1)
+  ; Jr RA
+
+  (* Modulo *)
+  ; Label "_mod"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Div (T2, T0, T1)
+  ; Mfhi V0
+  ; Jr RA
+
+
+  (* AND *)
+  ; Label "_and"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; And (V0, T0, T1)
+  ; Jr RA
+
+  (* OR *)
+  ; Label "_or"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Or (V0, T0, T1)
+  ; Jr RA
+
+  (* XOR *)
+  ; Label "_xor"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Xor (V0, T0, T1)
   ; Jr RA
 
   (* Less than (%lt) *)

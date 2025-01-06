@@ -189,7 +189,24 @@ let rec compile_instr etat instr =
        @ false_code
        @ [ Label ("endif" ^ uniq) ],
        { false_state with counter = false_state.counter })
-  
+    | Boucle (condition, body) ->
+     let uniq = string_of_int etat.counter in
+     let boucle_label = "boucle" ^ uniq in
+     let end_boucle_label = "endboucle" ^ uniq in
+     let updated_counter = etat.counter + 1 in
+
+     let compiled_condition = compile_expr etat condition in
+     let compiled_body, new_state = compile_block { etat with counter = updated_counter } body in
+
+     ([ Label boucle_label ]  (* Début de la boucle *)
+      @ compiled_condition  (* Évaluer la condition *)
+      @ [ Beqz (V0, end_boucle_label) ]  (* Quitter la boucle si la condition est fausse *)
+      @ compiled_body  (* Code du corps de la boucle *)
+      @ [ J boucle_label ]  (* Retour au début de la boucle *)
+      @ [ Label end_boucle_label ],  (* Fin de la boucle *)
+      new_state)
+    | Entree (_,_)-> failwith "Not implemented"
+    
   
   
   (*| Entree (prompt, var) -> *)
@@ -212,38 +229,160 @@ and compile_block state block =
       let cb, final_state = compile_block new_state rest in
       (ci @ cb), final_state
   
+let compile_func state (Func (typ, name, args, block)) =
+  (* Construire l'environnement local à partir des arguments *)
+  let local_env = 
+    List.fold_left 
+      (fun acc (i, arg) -> 
+        let offset = -4 * (i + 1) in
+        Printf.printf "Ajout de l'argument '%s' avec l'offset %d\n" arg offset;
+        Env.add arg offset acc
+      )
+      Env.empty 
+      (List.mapi (fun i arg -> (i, arg)) args)
+  in
+  
+  (*débogage pour les variables locales *)
+  let func_state = { 
+    env = local_env; 
+    fpo = 4 * (List.length args); 
+    counter = state.counter + 1; 
+    code = [] 
+  } in
+  
+
+  (*Compile le bloc de la fonction *)
+  let compiled_body, updated_state = compile_block func_state block in
+  (*construction le prologue *)
+  let prologue = [
+  Label name;
+  Addi (SP, SP, -16);   
+  Sw (RA, Mem (SP, 12));
+  Sw (FP, Mem (SP, 8)); 
+  Move (FP, SP)         
+] in
+
+let epilogue = [
+  Lw (RA, Mem (SP, 12));
+  Lw (FP, Mem (SP, 8)); 
+  Addi (SP, SP, 16);    
+  Jr RA                 
+] in
+  (*maj du compteur d'étiquettes *)
+  { state with counter = updated_state.counter },
+  prologue @ compiled_body @ epilogue
+      
 
 let rec compile_prog state prog =
   match prog with
-  | [] -> []
-  | e :: p ->
-    let ce , nouvel_env = compile_instr state e in
-    ce @ compile_prog nouvel_env p
+  | [] -> [], state
+  | Func (typ, name, args, block) :: rest ->
+    (* Compiler la fonction *)
+    let new_state, func_code = compile_func state (Func (typ, name, args, block)) in
+    (* Compiler les autres éléments du programme *)
+    let rest_code, final_state = compile_prog new_state rest in
+    func_code @ rest_code, final_state
+  (*| e :: p -> *)
+  (*  let ce , nouvel_env = compile_instr state e in *)
+  (*  let cp, final_state = compile_prog nouvel_env p in *)
+  (*  ce @ cp, final_state *)
+    (*ce @ compile_prog nouvel_env p*)
 let initial_env = Env.empty;;
 
 let etat_initial = { env = Env.empty; fpo = 8 ; code = [] ; counter = 0 }
 
-let compile prog =
-  let text =
-    Baselib.stdlib
-    (*; Move (FP, SP)*)
-    @ [ Label "main"
-    ; Addi (SP, SP, -etat_initial.fpo) 
-    ; Sw (RA, Mem (SP, etat_initial.fpo - 4))
-    ; Sw (FP, Mem (SP, etat_initial.fpo))
-    ; Move (FP, SP)
-    (*; Addi (FP, SP, etat_initial.fpo - 4) *)
-    ]
-    @ compile_prog etat_initial prog (*verif si ça marche*)
-    @ [Lw (RA, Mem (SP, etat_initial.fpo - 4))
-    ; Lw (FP, Mem (SP, etat_initial.fpo))
-    ; Addi (SP, SP, etat_initial.fpo) 
-    ; Jr RA ]
-  in
-  let data =
-    Hashtbl.fold (fun lbl s acc -> (lbl, Asciiz s) :: acc) string_table []
-  in
+let compile prog = 
+  let compiled_functions, final_state = compile_prog etat_initial prog in
+  let main_label = "main_entry" ^ string_of_int etat_initial.counter in
+  let text = 
+    Baselib.stdlib 
+    @ [ Label main_label  (* Point d'entrée distinct *)
+      ; Jal (Lbl "main")  (* Appelle la fonction utilisateur 'main' *)
+      ; Li (V0, 10) (* Syscall pour terminer le programme *)
+      ; Syscall ]
+    @ compiled_functions
+    (* @ [ Label "main" *)
+    (* ; Addi (SP, SP, -etat_initial.fpo)  *)
+    (* ; Sw (RA, Mem (SP, etat_initial.fpo - 4)) *)
+    (* ; Sw (FP, Mem (SP, etat_initial.fpo)) *)
+    (* ; Move (FP, SP) *)
+    (* ] *)
+    (* @ compiled_functions*)
+    (* @ [Lw (RA, Mem (SP, etat_initial.fpo - 4)) *)
+    (* ; Lw (FP, Mem (SP, etat_initial.fpo)) *)
+    (* ; Addi (SP, SP, etat_initial.fpo)  *)
+    (* ; Jr RA ] *)
+  in 
+  let data = Hashtbl.fold (fun lbl s acc -> (lbl, Asciiz s) :: acc) string_table [] in
   { text; data }
+
+
+
+(*let compile prog = *)
+(*  let compiled_code, final_state = compile_prog etat_initial prog in *)
+(* *)
+(*  (* Prologue of the main function *) *)
+(*  let main_prologue = [ *)
+(*    Label "main"; *)
+(*    Addi (SP, SP, -etat_initial.fpo); *)
+(*    Sw (RA, Mem (SP, etat_initial.fpo - 4)); *)
+(*    Sw (FP, Mem (SP, etat_initial.fpo)); *)
+(*    Move (FP, SP) *)
+(*  ] in *)
+(* *)
+(*  (* Epilogue of the main function *) *)
+(*  let main_epilogue = [ *)
+(*    Lw (RA, Mem (SP, etat_initial.fpo - 4)); *)
+(*    Lw (FP, Mem (SP, etat_initial.fpo)); *)
+(*    Addi (SP, SP, etat_initial.fpo); *)
+(*    Jr RA *)
+(*  ] in *)
+(* *)
+(*  (* Combine all code into the text section *) *)
+(*  let text =  *)
+(*    Baselib.stdlib *)
+(*    @ main_prologue *)
+(*    @ compiled_code *)
+(*    @ main_epilogue *)
+(*  in *)
+(* *)
+(*  (* Collect the data section *) *)
+(*  let data = Hashtbl.fold (fun lbl s acc -> (lbl, Asciiz s) :: acc) string_table [] in *)
+(* *)
+(*  { text; data } *)
+
+(*let compile prog = *)
+(*  let state = { env = Env.empty; fpo = 0; counter = 0; code = [] } in *)
+(* *)
+(*  (* Vérifie si 'main' est défini, sinon ajoute une fonction 'main' par défaut *) *)
+(*  let has_main = List.exists (function *)
+(*    | Func (_, "main", _, _) -> true *)
+(*    | _ -> false *)
+(*  ) prog in *)
+(* *)
+(*  let prog_with_main = *)
+(*    if has_main then prog *)
+(*    else *)
+(*      Func (Int_t, "main", [], []) :: prog *)
+(*  in *)
+(* *)
+(*  (* Compile le programme complet *) *)
+(*  let compiled_functions, _ = compile_prog state prog_with_main in *)
+(* *)
+(*  (* Ajouter un point d'entrée 'main_entry' *) *)
+(*  let main_entry = [ *)
+(*    Label "main_entry"; *)
+(*    Jal (Lbl "main"); (* Appelle la fonction main *) *)
+(*    Li (V0, 10); (* Code syscall pour terminer le programme *) *)
+(*    Syscall; *)
+(*  ] in *)
+(* *)
+(*  let data = Hashtbl.fold (fun lbl s acc -> (lbl, Asciiz s) :: acc) string_table [] in *)
+(* *)
+(*  { text = main_entry @ compiled_functions; data } *)
+
+
+
 (*let compile prog =*)
 (*  { text = Baselib.stdlib*)
 (*    @ [ Label "main" ; Addi (SP, SP, -4) ; Sw (RA, Mem (SP, 0)) ]*)

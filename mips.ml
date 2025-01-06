@@ -7,6 +7,7 @@ type reg =
 | FP
 | T0
 | T1
+| T2
 | RA
 | ZERO
 
@@ -32,9 +33,14 @@ type instr =
 | Sle of reg * reg * reg
 | Sge of reg * reg * reg
 | Sub of reg * reg * reg
+| Mul of reg * reg * reg
+| Div of reg * reg * reg
+| Xor of reg * reg * reg
+| Mfhi of reg
 | Lw of reg * loc
 | Jal of loc
 | Jr of reg
+| J of label
 | And of reg * reg * reg
 | Or of reg * reg * reg
 | Not of reg * reg
@@ -55,6 +61,7 @@ let fmt_reg = function
   | FP -> "$fp"
   | T0 -> "$t0"
   | T1 -> "$t1"
+  | T2 -> "$t2"
   | RA -> "$ra"
   | ZERO -> "$zero"
 
@@ -79,9 +86,15 @@ let fmt_instr = function
   | Sle (rd, rs, rt)        -> Printf.sprintf "sle %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
   | Sge (rd, rs, rt)        -> Printf.sprintf "sge %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
   | Sub (rd, rs, rt)        -> Printf.sprintf "sub %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Mul (rd, rs, rt)        -> Printf.sprintf "mul %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Div (rd, rs, rt)        -> Printf.sprintf "div %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Xor (rd, rs, rt)        -> Printf.sprintf "xor %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+
+  | Mfhi (r)        -> Printf.sprintf "mfhi %s" (fmt_reg r)
   | Lw (r, l)        -> Printf.sprintf "  lw %s, %s" (fmt_reg r) (fmt_loc l)
   | Jal l            -> Printf.sprintf "  jal %s" (fmt_loc l)
   | Jr r             -> Printf.sprintf "  jr %s" (fmt_reg r)
+  | J l              -> Printf.sprintf "  j %s" l
   | And (rd, r1, r2) -> Printf.sprintf "  and %s, %s, %s" (fmt_reg rd) (fmt_reg r1) (fmt_reg r2)
   | Or (rd, r1, r2)  -> Printf.sprintf "  or %s, %s, %s" (fmt_reg rd) (fmt_reg r1) (fmt_reg r2)
   | Not (rd, r)      -> Printf.sprintf "  not %s, %s" (fmt_reg rd) (fmt_reg r)

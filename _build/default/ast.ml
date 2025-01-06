@@ -29,12 +29,14 @@ module Syntax = struct
   | Print of { expr: expr; type_ : base_t ; pos: Lexing.position }
   | Entree of { expr: expr; type_ : base_t ; pos: Lexing.position }
   | Condition of { compar: expr; tblock: block; fblock: block; pos: Lexing.position }
+  | Boucle of { expr: expr; b: block; pos: Lexing.position }
 
   and block = instruction list
   
-
+  type def =
+  | Func of { typ : base_t; name : string; args : string list; block : block; pos : Lexing.position }
   
-  type prog = instruction list
+  type prog = def list
 
 end
 
@@ -54,9 +56,13 @@ module IR = struct
   (*| Retourne of expr *)
   | Print of expr * base_t
   | Condition of expr * block * block
+  | Boucle of expr * block
   | Entree of expr * base_t
   
   and block = instruction list
-  type prog = instruction list
+  
+  type def =
+  | Func of base_t * string * string list * block
+  type prog = def list
 
 end

@@ -1,0 +1,10 @@
+def int main(){
+    print("o");
+    if 12 > 10{
+        print("12 est grand");
+    } else {
+        print("chelou");
+    }
+    int a = 3;
+    print(a);
+}

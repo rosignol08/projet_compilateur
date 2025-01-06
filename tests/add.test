@@ -1,6 +1,8 @@
-int a;
-a = 42; 
-int b;
-b = 9;
-int ab;
-ab = 42 + 9;
+def int add(int a, int b) {
+    return a + b;
+}
+
+def int main() {
+    int result = add(5, 7);
+    print(result);
+}
