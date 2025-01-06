@@ -1,11 +1,44 @@
-if (0) { print("Never executed"); }
-else { print("Always executed"); }
+int x = 10;
+int y = 15;
 
+if x < y {
+    print("x est plus petit que y");
+} else {
+    print("x est plus grand ou egal a 15");
+}
 
-  | Print (e,typet) -> 
-    let compiled_expr = compile_expr env e in
-    match typet with 
-    | Int_t -> code @ compiled_expr @ [Jal (Lbl "_print_int")] , env , fpo , counter
-    | Bool_t -> code @ compiled_expr @ [Jal (Lbl "_print_int")] , env , fpo , counter
-    | Str_t -> code @ compiled_expr @ [Jal (Lbl "_printstr")] , env , fpo , counter
-    |  -> failwith "Print impossible"
+if 1 < 10 {
+    print("1 plus petit que 10 \n");
+} else {
+    print("chelou");
+}
+
+if 10 > 5 {
+    print("10 plus grands que 5 \n");
+} else {
+    print("chelou");
+}
+
+if 10 == 10 {
+    print("10 egale a 10 \n");
+} else {
+    print("chelou");
+}
+
+if 10 != 5 {
+    print("10 different de 5 \n");
+} else {
+    print("chelou");
+}
+
+if 5 <= 5 {
+    print("5 plus petit ou egal a 5 \n");
+} else {
+    print("chelou");
+}
+
+if 5 >= 5 {
+    print("5 plus petit ou egal a 5 \n");
+} else {
+    print("chelou");
+}

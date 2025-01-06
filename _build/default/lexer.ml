@@ -1063,97 +1063,97 @@ let
 # 1064 "lexer.ml"
 
   | 15 ->
-# 29 "lexer.mll"
-       ( Leq )
+# 30 "lexer.mll"
+       ( print_endline "Found '=='" ; Leq )
 # 1069 "lexer.ml"
 
   | 16 ->
-# 30 "lexer.mll"
-       ( Lneq )
+# 31 "lexer.mll"
+       ( print_endline "Found '!='" ; Lneq )
 # 1074 "lexer.ml"
 
   | 17 ->
-# 31 "lexer.mll"
-       ( Llt )
+# 32 "lexer.mll"
+       ( print_endline "Found '<'" ; Llt )
 # 1079 "lexer.ml"
 
   | 18 ->
-# 32 "lexer.mll"
-       ( Lgt )
+# 33 "lexer.mll"
+       ( print_endline "Found '>'" ; Lgt )
 # 1084 "lexer.ml"
 
   | 19 ->
-# 33 "lexer.mll"
-       ( Lle )
+# 34 "lexer.mll"
+       ( print_endline "Found '<='" ; Lle )
 # 1089 "lexer.ml"
 
   | 20 ->
-# 34 "lexer.mll"
-       ( Lge )
+# 35 "lexer.mll"
+       ( print_endline "Found '>='" ; Lge )
 # 1094 "lexer.ml"
 
   | 21 ->
-# 35 "lexer.mll"
-       ( Lif )
+# 36 "lexer.mll"
+       ( print_endline "Found 'if'"; Lif )
 # 1099 "lexer.ml"
 
   | 22 ->
-# 36 "lexer.mll"
-         ( Lelse )
+# 37 "lexer.mll"
+         ( print_endline "Found 'else'"; Lelse )
 # 1104 "lexer.ml"
 
   | 23 ->
-# 37 "lexer.mll"
+# 39 "lexer.mll"
         ( Ltypes(Int_t) )
 # 1109 "lexer.ml"
 
   | 24 ->
-# 38 "lexer.mll"
+# 40 "lexer.mll"
            ( Ltypes(String_t) )
 # 1114 "lexer.ml"
 
   | 25 ->
-# 39 "lexer.mll"
+# 41 "lexer.mll"
          ( Ltypes(Bool_t) )
 # 1119 "lexer.ml"
 
   | 26 ->
-# 40 "lexer.mll"
+# 42 "lexer.mll"
            ( Lreturn )
 # 1124 "lexer.ml"
 
   | 27 ->
-# 41 "lexer.mll"
+# 43 "lexer.mll"
           ( Lprintf )
 # 1129 "lexer.ml"
 
   | 28 ->
-# 42 "lexer.mll"
+# 44 "lexer.mll"
            ( Lscanf )
 # 1134 "lexer.ml"
 
   | 29 ->
 let
-# 43 "lexer.mll"
+# 45 "lexer.mll"
                 id
 # 1140 "lexer.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 43 "lexer.mll"
+# 45 "lexer.mll"
                    ( Lvariable id )
 # 1144 "lexer.ml"
 
   | 30 ->
-# 44 "lexer.mll"
+# 46 "lexer.mll"
       ( Lassigne )
 # 1149 "lexer.ml"
 
   | 31 ->
 let
-# 45 "lexer.mll"
+# 47 "lexer.mll"
        c
 # 1155 "lexer.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
-# 45 "lexer.mll"
+# 47 "lexer.mll"
          ( raise (Error c) )
 # 1159 "lexer.ml"
 

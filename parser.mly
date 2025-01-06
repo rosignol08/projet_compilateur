@@ -4,7 +4,7 @@ open Ast
 
 %token Lend
 %token <int> Lint
-%token <string> Lstring Lvariable
+%token <string> Lstring Lvariable STRING
 %token <bool> Ltrue Lfalse
 %token <Ast.base_t> Ltypes
 %token Lnot
@@ -37,14 +37,16 @@ expr:
 | s = Lstring { String { value = s; pos = $startpos(s) } }
 | b = Ltrue { Bool { value = b; pos = $startpos(b) } }
 | b = Lfalse { Bool { value = b; pos = $startpos(b) } }
+| v = Lvariable { Var { name = v; pos = $startpos(v) } }
 | a = expr ; Lplus ; b = expr { Call { func = "_add" ; args = [ a ; b ] ; pos = $startpos($2) }}
 | Lnot e = expr { Call { func = "_not"; args = [e]; pos = $startpos($1) } }
-| expr Leq expr { Call { func = "%eq"; args = [$1; $3]; pos = $startpos($2) } }
-| expr Lneq expr { Call { func = "%neq"; args = [$1; $3]; pos = $startpos($2) } }
-| expr Llt expr { Call { func = "%lt"; args = [$1; $3]; pos = $startpos($2) } }
-| expr Lgt expr { Call { func = "%gt"; args = [$1; $3]; pos = $startpos($2) } }
-| expr Lle expr { Call { func = "%le"; args = [$1; $3]; pos = $startpos($2) } }
-| expr Lge expr { Call { func = "%ge"; args = [$1; $3]; pos = $startpos($2) } }
+| expr ; Leq ; expr { Call { func = "_eq"; args = [$1; $3]; pos = $startpos($2) } }
+| expr ; Lneq ; expr { Call { func = "_neq"; args = [$1; $3]; pos = $startpos($2) } }
+| expr ; Llt ; expr { Call { func = "_lt"; args = [$1; $3]; pos = $startpos($2) } }
+| expr ; Lgt ; expr { Call { func = "_gt"; args = [$1; $3]; pos = $startpos($2) } }
+| expr ; Lle ; expr { Call { func = "_le"; args = [$1; $3]; pos = $startpos($2) } }
+| expr ; Lge ; expr { Call { func = "_ge"; args = [$1; $3]; pos = $startpos($2) } }
+;
 
 instruction:
 | d = Ltypes; v = Lvariable ; Lassigne ; e = expr ; Lfin { DeclAssigne { name = v; typ = d ; expr = e; pos = $startpos }}
@@ -53,5 +55,6 @@ instruction:
 (*| r = Lreturn ; e = expr ; Lfin { Retourne { expr = e; pos = $startpos(r) } } *)
 | Lprintf; Lopar; e = Lvariable; Lfpar; Lfin { Print { expr = Var { name = e; pos = $startpos(e) }; type_ = Int_t ; pos = $startpos(e) }}
 | Lprintf; Lopar; e = expr; Lfpar; Lfin { Print { expr = e; type_ = Int_t ; pos = $startpos(e) }}
-(*| Lscanf; Lopar; p = Lstring; Lvirgule; v = Lvariable; Lfpar; Lfin { Entree { prompt = p; var = Var { name = v; pos = $startpos(v) }; pos = $startpos(p) }} *)
-| Lif; Lopar; e = expr; Lfpar; Lobra; tb = block; Lfbra; Lelse; Lobra; fb = block; Lfbra { Condition { compar = e; tblock = tb; fblock = fb; pos = $startpos($1) }}
+(* | Lscanf; Lopar; p = Lstring; Lvirgule; v = Lvariable; Lfpar; Lfin { Entree { expr = p; var = Var { name = v; pos = $startpos(v) }; pos = $startpos(p) }}  *)
+(*| Lif; Lopar; e = expr; Lfpar; Lobra; tb = block; Lfbra; Lelse; Lobra; fb = block; Lfbra { Condition { compar = e; tblock = tb; fblock = fb; pos = $startpos($1) }}*)
+| Lif; e = expr; Lobra; tb = block; Lfbra; Lelse; Lobra; fb = block; Lfbra { Condition { compar = e; tblock = tb; fblock = fb; pos = $startpos }}

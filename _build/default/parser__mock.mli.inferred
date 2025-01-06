@@ -1,5 +1,6 @@
 type token =
-    Lvirgule
+    STRING of string
+  | Lvirgule
   | Lvariable of string
   | Ltypes of Ast.base_t
   | Ltrue of bool

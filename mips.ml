@@ -31,6 +31,7 @@ type instr =
 | Sgt of reg * reg * reg
 | Sle of reg * reg * reg
 | Sge of reg * reg * reg
+| Sub of reg * reg * reg
 | Lw of reg * loc
 | Jal of loc
 | Jr of reg
@@ -77,6 +78,7 @@ let fmt_instr = function
   | Sgt (rd, rs, rt)        -> Printf.sprintf "sgt %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
   | Sle (rd, rs, rt)        -> Printf.sprintf "sle %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
   | Sge (rd, rs, rt)        -> Printf.sprintf "sge %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
+  | Sub (rd, rs, rt)        -> Printf.sprintf "sub %s, %s, %s" (fmt_reg rd) (fmt_reg rs) (fmt_reg rt)
   | Lw (r, l)        -> Printf.sprintf "  lw %s, %s" (fmt_reg r) (fmt_loc l)
   | Jal l            -> Printf.sprintf "  jal %s" (fmt_loc l)
   | Jr r             -> Printf.sprintf "  jr %s" (fmt_reg r)

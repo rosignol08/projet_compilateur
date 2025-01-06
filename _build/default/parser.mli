@@ -2,6 +2,7 @@
 (* The type of tokens. *)
 
 type token = 
+  | STRING of (string)
   | Lvirgule
   | Lvariable of (string)
   | Ltypes of (Ast.base_t)

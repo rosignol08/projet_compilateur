@@ -56,14 +56,14 @@ let rec compile_expr etat expr =
       let loc = Mem (FP, -offset) in
       [ Lw (V0, loc) ]  (* Charge la valeur depuis la pile *)
     | None ->
-      failwith (Printf.sprintf "Variable '%s' not found" v)
+      failwith (Printf.sprintf "Variable '%s' introuvable" v)
   )
     (*[ Lw (V0, Env.find_opt v env)]*)
     (*( *)
     (*match Env.find v env with*)
     (*| None -> [Addi (SP, SP, -4) ; Sw (V0, Mem (SP, 0))]*)
     (*| Some nom -> [ Lw (V0, Mem (SP, 0)) ; Addi (SP, SP, 4) ])*)
-    | Call (func, args) when List.mem func ["%eq"; "%neq"; "%lt"; "%gt"; "%le"; "%ge"] ->
+    | Call (func, args) when List.mem func ["_eq"; "_neq"; "_lt"; "_gt"; "_le"; "_ge"] ->
       (* Vérifier que le nombre d'arguments est correct *)
       if List.length args <> 2 then
         failwith (Printf.sprintf "Operator '%s' expects 2 arguments" func);
@@ -72,17 +72,30 @@ let rec compile_expr etat expr =
       let left = List.nth args 0 in
       let right = List.nth args 1 in
       compile_expr etat left
-      @ [ Addi (SP, SP, -4); Sw (V0, Mem (SP, 0)) ]  (* Empiler la valeur gauche *)
-      @ compile_expr etat right
-      @ [ Lw (T0, Mem (SP, 0)); Addi (SP, SP, 4) ]  (* Dépiler la valeur gauche dans T0 *)
-      @ (match func with
-         | "%eq" -> [ Seq (V0, T0, V0) ]  (* V0 = (T0 == V0) *)
-         | "%neq" -> [ Sne (V0, T0, V0) ] (* V0 = (T0 != V0) *)
-         | "%lt" -> [ Slt (V0, T0, V0) ]  (* V0 = (T0 < V0) *)
-         | "%gt" -> [ Sgt (V0, T0, V0) ]  (* V0 = (T0 > V0) *)
-         | "%le" -> [ Sle (V0, T0, V0) ]  (* V0 = (T0 <= V0) *)
-         | "%ge" -> [ Sge (V0, T0, V0) ]  (* V0 = (T0 >= V0) *)
-         | _ -> failwith "Unsupported operator")
+    @ [ Addi (SP, SP, -4); Sw (V0, Mem (SP, 0)) ]  (* Empiler la valeur gauche *)
+    @ compile_expr etat right
+    @ [ Lw (T0, Mem (SP, 0)); Addi (SP, SP, 4) ]  (* Dépiler la valeur gauche dans T0 *)
+    @ (match func with
+        | "_eq" -> [ Seq (V0, T0, V0) ]  (* V0 = (T0 == V0) *)
+        | "_neq" -> [ Sne (V0, T0, V0) ] (* V0 = (T0 != V0) *)
+        | "_lt" -> [ Slt (V0, T0, V0) ]  (* V0 = (T0 < V0) *)
+        | "_gt" -> [ Sgt (V0, T0, V0) ]  (* V0 = (T0 > V0) *)
+        | "_le" -> [ Sle (V0, T0, V0) ]  (* V0 = (T0 <= V0) *)
+        | "_ge" -> [ Sge (V0, T0, V0) ]  (* V0 = (T0 >= V0) *)
+        | _ -> failwith "Unsupported operator")
+    (*@ [ Jal (Lbl func) ] *)  (* Appeler la fonction *)
+      (*compile_expr etat left *)
+      (*@ [ Addi (SP, SP, -4); Sw (V0, Mem (SP, 0)) ]  (* Empiler la valeur gauche *) *)
+      (*@ compile_expr etat right *)
+      (*@ [ Lw (T0, Mem (SP, 0)); Addi (SP, SP, 4) ]  (* Dépiler la valeur gauche dans T0 *) *)
+      (*@ (match func with *)
+      (*   | "%eq" -> [ Seq (V0, T0, V0) ]  (* V0 = (T0 == V0) *) *)
+      (*   | "%neq" -> [ Sne (V0, T0, V0) ] (* V0 = (T0 != V0) *) *)
+      (*   | "%lt" -> [ Slt (V0, T0, V0) ]  (* V0 = (T0 < V0) *) *)
+      (*   | "%gt" -> [ Sgt (V0, T0, V0) ]  (* V0 = (T0 > V0) *) *)
+      (*   | "%le" -> [ Sle (V0, T0, V0) ]  (* V0 = (T0 <= V0) *) *)
+      (*   | "%ge" -> [ Sge (V0, T0, V0) ]  (* V0 = (T0 >= V0) *) *)
+      (*   | _ -> failwith "Unsupported operator") *)
   
     | Call (func, args) ->
     List.concat_map
@@ -157,17 +170,26 @@ let rec compile_instr etat instr =
       | _ -> failwith "Type pas supporte pour Print"
     in
     code_expr @ code_print , etat
-  | Condition (compar, tblock, fblock) ->
-    let uniq = string_of_int etat.counter in
-    let true_code, true_state = compile_block etat tblock in
-    let false_code, false_state = compile_block true_state fblock in
-    ([ Label ("if" ^ uniq) ]
-     @ compile_expr etat compar
-     @ [ Beqz (V0, "else" ^ uniq) ]  (* Sauter au bloc else si la condition est fausse *)
-     @ true_code
-     @ [ B ("endif" ^ uniq); Label ("else" ^ uniq) ]  (* Sauter à la fin après le bloc then *)
-     @ false_code
-     @ [ Label ("endif" ^ uniq) ] , false_state)
+    | Condition (compar, tblock, fblock) ->
+      let uniq = string_of_int etat.counter in
+      let updated_counter = etat.counter + 1 in
+      let true_code, true_state =
+        if tblock = [] then [], etat
+        else compile_block { etat with counter = updated_counter } tblock
+      in
+      let false_code, false_state =
+        if fblock = [] then [], true_state
+        else compile_block { true_state with counter = true_state.counter + 1 } fblock
+      in
+      ([ Label ("if" ^ uniq) ]
+       @ compile_expr etat compar
+       @ [ Beqz (V0, "else" ^ uniq) ]  (* Sauter au bloc else si la condition est fausse *)
+       @ true_code
+       @ [ B ("endif" ^ uniq); Label ("else" ^ uniq) ]  (* Sauter à la fin après le bloc then *)
+       @ false_code
+       @ [ Label ("endif" ^ uniq) ],
+       { false_state with counter = false_state.counter })
+  
   
   
   (*| Entree (prompt, var) -> *)

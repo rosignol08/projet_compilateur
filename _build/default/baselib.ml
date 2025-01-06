@@ -5,7 +5,14 @@ module Env = Map.Make(String)
 
 let types =
   Env.of_seq (List.to_seq [
-    "_add", Func_t (Int_t, [ Int_t ; Int_t ])
+    "_add", Func_t (Int_t, [ Int_t ; Int_t ]);
+    "_not", Func_t (Bool_t, [ Bool_t ]);
+    "_lt", Func_t (Bool_t, [ Int_t ; Int_t ]);
+    "_gt", Func_t (Bool_t, [ Int_t ; Int_t ]);
+    "_eq", Func_t (Bool_t, [ Int_t ; Int_t ]);
+    "_neq", Func_t (Bool_t, [ Int_t ; Int_t ]);
+    "_le", Func_t (Bool_t, [ Int_t ; Int_t ]);
+    "_ge", Func_t (Bool_t, [ Int_t ; Int_t ]);
   ])
 
 let stdlib =
@@ -13,6 +20,48 @@ let stdlib =
   ; Lw (T0, Mem (SP, 4))
   ; Lw (T1, Mem (SP, 0))
   ; Add (V0, T0, T1)
+  ; Jr RA
+
+  (* Less than (%lt) *)
+  ; Label "_lt"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Slt (V0, T0, T1)
+  ; Jr RA
+
+  (* Greater than (%gt) *)
+  ; Label "_gt"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Sgt (V0, T0, T1)
+  ; Jr RA
+
+  (* Equality (%eq) *)
+  ; Label "_eq"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Seq (V0, T0, T1)
+  ; Jr RA
+
+  (* Not equal (%neq) *)
+  ; Label "_neq"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Sne (V0, T0, T1)
+  ; Jr RA
+
+  (* Less than or equal (%le) *)
+  ; Label "_le"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Sle (V0, T0, T1)
+  ; Jr RA
+
+  (* Greater than or equal (%ge) *)
+  ; Label "_ge"
+  ; Lw (T0, Mem (SP, 4))
+  ; Lw (T1, Mem (SP, 0))
+  ; Sge (V0, T0, T1)
   ; Jr RA
   ]
 

@@ -26,14 +26,16 @@ rule token = parse
 | ')' { Lfpar }
 | '{' { Lobra }
 | '}' { Lfbra }
-| "==" { Leq }
-| "!=" { Lneq }
-| "<"  { Llt }
-| ">"  { Lgt }
-| "<=" { Lle }
-| ">=" { Lge }
-| "if" { Lif }
-| "else" { Lelse }
+
+| "==" { print_endline "Found '=='" ; Leq }
+| "!=" { print_endline "Found '!='" ; Lneq }
+| "<"  { print_endline "Found '<'" ; Llt }
+| ">"  { print_endline "Found '>'" ; Lgt }
+| "<=" { print_endline "Found '<='" ; Lle }
+| ">=" { print_endline "Found '>='" ; Lge }
+| "if" { print_endline "Found 'if'"; Lif }
+| "else" { print_endline "Found 'else'"; Lelse }
+
 | "int" { Ltypes(Int_t) }
 | "string" { Ltypes(String_t) }
 | "bool" { Ltypes(Bool_t) }

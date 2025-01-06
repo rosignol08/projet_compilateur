@@ -27,7 +27,7 @@ module Syntax = struct
   | DeclAssigne of { name : string ; typ : base_t ; expr : expr ; pos : Lexing.position }
   (*| Retourne of { expr : expr ; pos : Lexing.position } *)
   | Print of { expr: expr; type_ : base_t ; pos: Lexing.position }
-  (*| Entree of { expr: expr; type_ : base_t ; pos: Lexing.position } *)
+  | Entree of { expr: expr; type_ : base_t ; pos: Lexing.position }
   | Condition of { compar: expr; tblock: block; fblock: block; pos: Lexing.position }
 
   and block = instruction list
@@ -54,9 +54,9 @@ module IR = struct
   (*| Retourne of expr *)
   | Print of expr * base_t
   | Condition of expr * block * block
+  | Entree of expr * base_t
   
   and block = instruction list
-  (*| Entree of expr * base_t *)
   type prog = instruction list
 
 end
