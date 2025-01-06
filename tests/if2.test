@@ -1,7 +1,0 @@
-int x;
-x = 42;
-int y;
-y = 1;
-print(x);
-print("\n");
-print(y);
