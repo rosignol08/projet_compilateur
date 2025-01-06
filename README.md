@@ -59,8 +59,8 @@
     ```
 
 ### Compilation d'un programme :
--Pour compiler un programme source :
-
+- Pour compiler un programme source :
+    ```bash
     ./main.exe tests/add.test
-    
+    ```
 Ensuite, copiez-collez l'affichage du terminal (de `.text` à `.data`) dans le fichier `e.s` et chargez-le dans SPIM.
