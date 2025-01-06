@@ -1,7 +1,11 @@
-int a = 0;
-int b = 0;
-while (a == b) {
-    print("Infinite loop");
-    a = 2;
+def int main(){
+    int a = 0;
+    int b = 0;
+    while (a < 10) {
+        print("Boucle \n");
+        print(a);
+        a = a + 1;
+    }
+    print("fini a =");
+    print(a);
 }
-print("saute");

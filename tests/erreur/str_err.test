@@ -1,4 +1,4 @@
 def int main(){
-    string test = "ouaiss";
+    string test = 1;
     print(test);
 }

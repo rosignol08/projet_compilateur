@@ -50,7 +50,7 @@ rule token = parse
 | "string" { Ltypes(String_t) }
 | "bool" { Ltypes(Bool_t) }
 | "return" { Lreturn }
-| "print" { Lprintf }
+| "print" { print_endline "Found 'print'"; Lprintf }
 | "entree" { Lscanf }
 
 | "def" { print_endline "Found 'def'"; Ldef }

@@ -8,7 +8,7 @@ def int main() {
 
     while ( result < 10){
         print("result plus petit que 10 \n");
-        result = result + 1;
+        result = result + bool;
     }
     if result < 10{
         print("result plus petit que 10\n");

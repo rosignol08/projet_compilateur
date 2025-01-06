@@ -1,0 +1,7 @@
+def int main(){
+    if 12 < true{
+        print("cest pas normal");
+    } else{
+        print("cest pas normal");
+    }
+}

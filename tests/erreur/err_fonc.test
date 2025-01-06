@@ -1,4 +1,4 @@
-def int main(){
+def int maine(){
     int a = 5;
     int b = a%2;
     if b > a{

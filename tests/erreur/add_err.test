@@ -1,7 +1,7 @@
 def int main() {
     int a = 1;
     int b = 1;
-    int result;
+    bool result;
     result = a + b;
     print(result);
 }

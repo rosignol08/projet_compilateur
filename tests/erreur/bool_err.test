@@ -1,6 +1,6 @@
 def int main(){
     bool test = false;
-    bool test2 = false;
+    bool test2 = 2;
     if test || test2 {
         print("un des deux est vrai");
     } else{

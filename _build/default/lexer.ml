@@ -1331,7 +1331,7 @@ let
 
   | 36 ->
 # 53 "lexer.mll"
-          ( Lprintf )
+          ( print_endline "Found 'print'"; Lprintf )
 # 1336 "lexer.ml"
 
   | 37 ->

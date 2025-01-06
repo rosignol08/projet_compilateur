@@ -1,44 +1,46 @@
-int x = 10;
-int y = 15;
+def int main(){
+    int x = 10;
+    int y = 15;
 
-if x < y {
-    print("x est plus petit que y");
-} else {
-    print("x est plus grand ou egal a 15");
-}
+    if x < y {
+        print("x est plus petit que y");
+    } else {
+        print("x est plus grand ou egal a 15\n");
+    }
 
-if 1 < 10 {
-    print("1 plus petit que 10 \n");
-} else {
-    print("chelou");
-}
+    if 1 < 10 {
+        print("1 plus petit que 10 \n");
+    } else {
+        print("chelou");
+    }
 
-if 10 > 5 {
-    print("10 plus grands que 5 \n");
-} else {
-    print("chelou");
-}
+    if 10 > 5 {
+        print("10 plus grands que 5 \n");
+    } else {
+        print("chelou");
+    }
 
-if 10 == 10 {
-    print("10 egale a 10 \n");
-} else {
-    print("chelou");
-}
+    if 10 == 10 {
+        print("10 egale a 10 \n");
+    } else {
+        print("chelou");
+    }
 
-if 10 != 5 {
-    print("10 different de 5 \n");
-} else {
-    print("chelou");
-}
+    if 10 != 5 {
+        print("10 different de 5 \n");
+    } else {
+        print("chelou");
+    }
 
-if 5 <= 5 {
-    print("5 plus petit ou egal a 5 \n");
-} else {
-    print("chelou");
-}
+    if 5 <= 5 {
+        print("5 plus petit ou egal a 5 \n");
+    } else {
+        print("chelou");
+    }
 
-if 5 >= 5 {
-    print("5 plus petit ou egal a 5 \n");
-} else {
-    print("chelou");
+    if 5 >= 5 {
+        print("5 plus petit ou egal a 5 \n");
+    } else {
+        print("chelou");
+    }
 }
